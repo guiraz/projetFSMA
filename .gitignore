@@ -2,4 +2,4 @@ bin/*
 .settings/*
 .project
 .classpath
-./*.txt
+*.txt
