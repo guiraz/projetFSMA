@@ -23,7 +23,7 @@ public class Acheteur extends Agent {
 		_gui = new AcheteurInterface(this);
 		
 		addBehaviour(new ReceiveAcheteurBehaviour(this));
-		addBehaviour(new CreateClientBehaviour(getAID().getLocalName().toString()));
+		addBehaviour(new CreateClientBehaviour());
 	}
 
 	protected void takeDown() {

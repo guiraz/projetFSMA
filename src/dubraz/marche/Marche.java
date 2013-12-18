@@ -23,7 +23,7 @@ public class Marche extends Agent {
 	@Override
 	protected void setup() {
 		
-		System.out.println("Hello! Le Marché d'Ordralfabétix "+getAID().getName()+" is ready.");
+		System.out.println("Hello! Le Marché d'Ordralfabétix "+getAID().getLocalName()+" is ready.");
 		System.out.println("state : "+this.getState());
 		_sellersNames = new ArrayList<String>();
 		_buyersNames = new ArrayList<String>();

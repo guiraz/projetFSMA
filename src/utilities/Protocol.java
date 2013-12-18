@@ -3,7 +3,7 @@ package utilities;
 import jade.lang.acl.ACLMessage;
 
 public enum Protocol {
-	TO_CREATECLIENT (ACLMessage.SUBSCRIBE),
+	TO_CREATE (ACLMessage.SUBSCRIBE),
 	TO_ANNOUNCE (ACLMessage.CFP),
 	TO_BID (ACLMessage.PROPOSE),
 	TO_ATTRIBUTE (ACLMessage.ACCEPT_PROPOSAL),

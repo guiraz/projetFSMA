@@ -23,11 +23,16 @@ public class ReceiveMarcheBehaviour extends CyclicBehaviour {
 				_papa.setAnnounce(msg.getSender().getLocalName().toString(), amount);
 			}
 			
-			if(msg.getPerformative() == Protocol.TO_CREATECLIENT.getProtocol()) {
-				if(!_papa.createClient(msg.getContent())){
-					ACLMessage response = new ACLMessage(Protocol.TO_DECLINE.getProtocol());
-					response.addReceiver(msg.getSender());
-					_papa.send(response);
+			if(msg.getPerformative() == Protocol.TO_CREATE.getProtocol()) {
+				if(msg.getContent() == "client") {
+					if(!_papa.createClient(msg.getSender().getLocalName())){
+						ACLMessage response = new ACLMessage(Protocol.TO_DECLINE.getProtocol());
+						response.addReceiver(msg.getSender());
+						_papa.send(response);
+					}
+				}
+				else {
+					//todo
 				}
 			}
 			

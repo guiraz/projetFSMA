@@ -16,6 +16,8 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
 
+import utilities.MyTableModel;
+
 public class VendeurInterface extends JFrame {
 	
 	private static final long serialVersionUID = 1L;
@@ -107,12 +109,31 @@ public class VendeurInterface extends JFrame {
 		launch();
 	}
 	
+	public void ErrorMessage(String mess) {
+		JOptionPane.showMessageDialog(this, mess, "Error", JOptionPane.ERROR_MESSAGE);
+	}
+	
+	public void reset() {
+		_timerTextField.setEditable(true);
+		_amountTextField.setEditable(true);
+		_buttonAnnounce.setEnabled(true);
+		_clientTable.setModel(new MyTableModel(null, new String[] {"Clients"}));
+	}
+	
 	public String getAmount() {
 		return _amountTextField.getText();
 	}
 	
 	public String getTimer() {
 		return _timerTextField.getText();
+	}
+	
+	public String getMarcketName() {
+		String result = null;
+		while(result==null || result.equals("")) {
+			result = JOptionPane.showInputDialog("Nom du marché :");
+		}
+		return result;
 	}
 	
 	private void launch() {
@@ -145,17 +166,20 @@ public class VendeurInterface extends JFrame {
 		}
 		else
 		{
-			Float timer, amount;
+			Float amount;
+			Long timer;
 			try{
 				amount = Float.parseFloat(_amountTextField.getText());
 				_papa.setAmount(amount);
-				timer = Float.parseFloat(_timerTextField.getText());
+				timer = Long.parseLong(_timerTextField.getText());
 				_papa.setTimer(timer);
 				_papa.announce();
 				_buttonAnnounce.setEnabled(false);
+				_timerTextField.setEditable(false);
+				_amountTextField.setEditable(false);
 			}
 			catch(Exception e) {
-				JOptionPane.showMessageDialog(this, "Timer et prix doivent être des réels", " Erreur de saisie ", JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(this, "Timer doit être un entier et prix doit être un réel", " Erreur de saisie ", JOptionPane.ERROR_MESSAGE);
 				_amountTextField.setText("");
 				_timerTextField.setText("");
 			}

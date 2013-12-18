@@ -58,6 +58,14 @@ public class AcheteurInterface extends JFrame {
 		JOptionPane.showMessageDialog(this, mess, "Error", JOptionPane.ERROR_MESSAGE);
 	}
 	
+	public String getMarcketName() {
+		String result = null;
+		while(result==null || result.equals("")) {
+			result = JOptionPane.showInputDialog("Nom du marché :");
+		}
+		return result;
+	}
+	
 	private void launch() {
 		java.awt.EventQueue.invokeLater(new Runnable() {
             @Override
