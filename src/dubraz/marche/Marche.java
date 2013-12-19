@@ -3,11 +3,7 @@ package dubraz.marche;
 import java.util.ArrayList;
 import java.util.List;
 
-import jade.core.AID;
 import jade.core.Agent;
-import jade.domain.AMSService;
-import jade.domain.FIPAAgentManagement.AMSAgentDescription;
-import jade.domain.FIPAAgentManagement.GetDescription;
 
 public class Marche extends Agent {
 	

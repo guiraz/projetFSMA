@@ -13,8 +13,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.UIManager;
-import javax.swing.GroupLayout.Alignment;
-import javax.swing.table.AbstractTableModel;
 
 public class MarcheInterface extends JFrame {
 	
