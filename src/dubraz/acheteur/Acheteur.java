@@ -3,6 +3,9 @@ package dubraz.acheteur;
 import java.util.ArrayList;
 import java.util.List;
 
+import utilities.OneMessageBehaviour;
+import utilities.Protocol;
+
 import jade.core.Agent;
 
 public class Acheteur extends Agent {
@@ -11,6 +14,7 @@ public class Acheteur extends Agent {
 	
 	private List<String> _sellersNames;
 	private List<Float> _amounts;
+	private final String _marcketName = "marché";
 	
 	private AcheteurInterface _gui;
 	
@@ -22,8 +26,9 @@ public class Acheteur extends Agent {
 		
 		_gui = new AcheteurInterface(this);
 		
+		String[] receivers = new String[] {_marcketName};
+		addBehaviour(new OneMessageBehaviour(this, receivers, Protocol.TO_CREATE, "client"));
 		addBehaviour(new ReceiveAcheteurBehaviour(this));
-		addBehaviour(new CreateClientBehaviour());
 	}
 
 	protected void takeDown() {
@@ -44,8 +49,14 @@ public class Acheteur extends Agent {
 		return _amounts;
 	}
 	
-	public void nameAlreadyExist() {
-		_gui.ErrorMessage("Ce nom existe déjà! Arrêt de l'agent.");
-		stop();
+	public void addOffer(String v, Float a) {
+		if(_sellersNames.contains(v)) {
+			_amounts.set(_sellersNames.indexOf(v), a);
+		}
+		else {
+			_sellersNames.add(v);
+			_amounts.add(a);
+		}
+		_gui.ressourcesUpdated();
 	}
 }

@@ -6,17 +6,21 @@ import java.awt.event.ActionListener;
 
 import javax.swing.*;
 
+import utilities.MyTableModel;
+
 public class AcheteurInterface extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 	
 	private Acheteur _papa;
 	private JButton _buttonQuit;
+	private JButton _buttonBid;
 	private JTable _table;
 	private JScrollPane _scrollPane;
 	
 	public AcheteurInterface(Acheteur papa) {
 		_papa = papa;
+		setTitle(_papa.getName());
 		
 		_buttonQuit = new JButton("Quitter");
 		_buttonQuit.addActionListener(new ActionListener() {
@@ -27,7 +31,18 @@ public class AcheteurInterface extends JFrame {
 			}
 		});
 		
-		_table = new JTable(new Object[0][3], new String[] {"Vendeur","Prix","Enchérir"});
+		_buttonBid = new JButton("Enchérir");
+		_buttonBid.setEnabled(false);
+		_buttonBid.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				ActionBid(e);
+			}
+		});
+		
+		_table = new JTable(new Object[0][2], new String[] {"Vendeur","Prix"});
+		_table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		_scrollPane = new JScrollPane();
 		_scrollPane.setViewportView(_table);
 		_scrollPane.setMinimumSize(new Dimension(200, 200));
@@ -40,13 +55,17 @@ public class AcheteurInterface extends JFrame {
         
         layout.setHorizontalGroup(
                 layout.createSequentialGroup()
-	                .addComponent(_scrollPane)
-                    .addComponent(_buttonQuit)
+                	.addComponent(_scrollPane)
+                	.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
+                			.addComponent(_buttonBid)
+                			.addComponent(_buttonQuit))
         );
         layout.setVerticalGroup(
                 layout.createSequentialGroup()
-	                .addComponent(_scrollPane)
-                    .addComponent(_buttonQuit)
+	                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
+            			.addComponent(_scrollPane)
+            			.addComponent(_buttonBid))
+        			.addComponent(_buttonQuit)
         );
         
         pack();
@@ -58,12 +77,20 @@ public class AcheteurInterface extends JFrame {
 		JOptionPane.showMessageDialog(this, mess, "Error", JOptionPane.ERROR_MESSAGE);
 	}
 	
-	public String getMarcketName() {
-		String result = null;
-		while(result==null || result.equals("")) {
-			result = JOptionPane.showInputDialog("Nom du marché :");
+	public void ressourcesUpdated() {
+		Object[][] data = new Object[_papa.getSellersNames().size()][2];
+		for(int i=0; i<_papa.getSellersNames().size(); i++) {
+			data[i][0] = _papa.getSellersNames().get(i);
+			data[i][1] = _papa.getAmounts().get(i);
 		}
-		return result;
+		
+		String[] columnsNames = new String[] {"Vendeur", "Prix"};
+		_table.setModel(new MyTableModel(data, columnsNames));
+		
+		if(_papa.getSellersNames().size() > 0)
+			_buttonBid.setEnabled(true);
+		else
+			_buttonBid.setEnabled(false);
 	}
 	
 	private void launch() {
@@ -88,6 +115,10 @@ public class AcheteurInterface extends JFrame {
         if(JOptionPane.showOptionDialog(null, "Voulez vous quitter?", "Quitter", JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE, null, options, options[0]) == JOptionPane.OK_OPTION) {
             _papa.stop();
         }
+	}
+	
+	private void ActionBid(ActionEvent e) {
+		//todo
 	}
 
 }

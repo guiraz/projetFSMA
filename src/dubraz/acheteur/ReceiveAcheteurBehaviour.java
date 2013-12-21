@@ -20,7 +20,11 @@ public class ReceiveAcheteurBehaviour extends CyclicBehaviour {
 		if (msg != null){
 			
 			if(msg.getPerformative() == Protocol.TO_DECLINE.getProtocol()) {
-				_papa.nameAlreadyExist();
+			}
+			
+			if(msg.getPerformative() == Protocol.TO_ANNOUNCE.getProtocol()) {
+				String[] content = msg.getContent().split("~");
+				_papa.addOffer(content[0], Float.parseFloat(content[1]));
 			}
 			
 		}

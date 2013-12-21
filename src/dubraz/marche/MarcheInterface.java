@@ -25,6 +25,7 @@ public class MarcheInterface extends JFrame {
 	
 	public MarcheInterface(Marche papa) {
 		_papa = papa;
+		setTitle(_papa.getName());
 		
 		this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		

@@ -3,6 +3,9 @@ package dubraz.marche;
 import java.util.ArrayList;
 import java.util.List;
 
+import utilities.OneMessageBehaviour;
+import utilities.Protocol;
+
 import jade.core.Agent;
 
 public class Marche extends Agent {
@@ -12,15 +15,14 @@ public class Marche extends Agent {
 	 */
 	private static final long serialVersionUID = 1L;
 	private MarcheInterface _gui;
-	private List<String> _sellersNames;
-	private List<String> _buyersNames;
-	private List<Float> _amounts;
+	private volatile List<String> _sellersNames;
+	private volatile List<String> _buyersNames;
+	private volatile List<Float> _amounts;
 
 	@Override
 	protected void setup() {
 		
 		System.out.println("Hello! Le Marché d'Ordralfabétix "+getAID().getLocalName()+" is ready.");
-		System.out.println("state : "+this.getState());
 		_sellersNames = new ArrayList<String>();
 		_buyersNames = new ArrayList<String>();
 		_amounts = new ArrayList<Float>();
@@ -42,36 +44,32 @@ public class Marche extends Agent {
 	}
 	
 	public void setAnnounce(String name, Float amount) {
-		boolean find = false;
-		int i=0;
-		while(!find && i!=_sellersNames.size()) {
-			if(_sellersNames.get(i).equals(name)) {
-				_amounts.set(i, amount);
-				find = true;
-			}
-			else
-				i++;
+		if(_sellersNames.contains(name)) {
+			System.out.println(_sellersNames.indexOf(name) + " " + amount);
+			_amounts.set(_sellersNames.indexOf(name), amount);
 		}
-		if(!find) {
+		else {
 			_sellersNames.add(name);
 			_amounts.add(amount);
 		}
-		
 		_gui.RessourcesUpdated();
+		
+		String mess = name + "~" + amount.toString();
+		String[] bn = new String[_buyersNames.size()];
+		for(int i=0; i<_buyersNames.size(); i++)
+			bn[i] = _buyersNames.get(i);
+		if(bn.length > 0)
+			addBehaviour(new OneMessageBehaviour(this, bn, Protocol.TO_ANNOUNCE, mess));
 	}
 	
-	public boolean createClient(String name) {
-		boolean find = false;
-		for(int i=0; i<_buyersNames.size(); i++)
-			if(_buyersNames.get(i) == name)
-				find = true;
-		if(!find) {
-			_buyersNames.add(name);
-			return true;
-		}
-		else {
-			return false;
-		}
+	public void createClient(String name) {
+		_buyersNames.add(name);
+		System.out.println(_buyersNames.size());
+	}
+	
+	public void createVendeur(String name) {
+		_sellersNames.add(name);
+		_amounts.add(new Float(-1));
 	}
 	
 	public List<String> getSellersNames() {

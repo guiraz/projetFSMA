@@ -3,7 +3,7 @@ package dubraz.vendeur;
 import java.util.ArrayList;
 import java.util.List;
 
-import utilities.OneReceiverMessageBehaviour;
+import utilities.OneMessageBehaviour;
 import utilities.Protocol;
 
 import jade.core.Agent;
@@ -16,7 +16,7 @@ public class Vendeur extends Agent {
 	private Float _stepAmount;
 	private Long _timer;
 	private List<String> _namesClients;
-	private String _marcketName;
+	private final String _marcketName = "marché";
 	private VendeurInterface _gui;
 	private boolean _announcing;
 	
@@ -105,10 +105,10 @@ public class Vendeur extends Agent {
 		_announcing = false;
 		_namesClients = new ArrayList<String>();
 		_gui = new VendeurInterface(this);
-		
-		_marcketName = _gui.getMarcketName();
-		addBehaviour(new OneReceiverMessageBehaviour(this, _marcketName, Protocol.TO_CREATE, "vendeur"));
-		addBehaviour(new ReceiveMessageVendeurBehaviour(this));
+
+		String[] receivers = new String[] {_marcketName};
+		addBehaviour(new OneMessageBehaviour(this, receivers, Protocol.TO_CREATE, "vendeur"));
+		addBehaviour(new ReceiveVendeurBehaviour(this));
 	}
 	
 	protected void takeDown() {
@@ -124,7 +124,8 @@ public class Vendeur extends Agent {
 	public void announce() {
 		_gui.update();
 		_announcing = true;
-		addBehaviour( new OneReceiverMessageBehaviour(this, _marcketName, Protocol.TO_ANNOUNCE, _amount.toString()));
+		String[] receivers = new String[] {_marcketName};
+		addBehaviour( new OneMessageBehaviour(this, receivers, Protocol.TO_ANNOUNCE, _amount.toString()));
 		doWait(_timer*1000);
 		addBehaviour(new ProposalVendeurBehaviour(this));
 	}
@@ -143,7 +144,8 @@ public class Vendeur extends Agent {
 	//timeout done attribuer l'enchérisseur
 	public void attribute() {
 		_announcing = false;
-		addBehaviour(new OneReceiverMessageBehaviour(this, _marcketName, Protocol.TO_ATTRIBUTE, getClient(0)));
+		String[] receivers = new String[] {_marcketName};
+		addBehaviour(new OneMessageBehaviour(this, receivers, Protocol.TO_ATTRIBUTE, getClient(0)));
 	}
 	
 	public void payment(String clName) {
@@ -152,11 +154,6 @@ public class Vendeur extends Agent {
 		_namesClients.clear();
 		_gui.ErrorMessage("Paiement reçude " + clName + ".");
 		_gui.reset();
-	}
-	
-	public void nameAlreadyExist() {
-		_gui.ErrorMessage("Ce nom de vendeur existe déjà!");
-		this.stop();
 	}
 	
 }

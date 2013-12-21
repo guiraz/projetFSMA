@@ -154,14 +154,6 @@ public class VendeurInterface extends JFrame {
 		_clientTable.setModel(new MyTableModel(data, new String[] {"Clients"}));
 	}
 	
-	public String getMarcketName() {
-		String result = null;
-		while(result==null || result.equals("")) {
-			result = JOptionPane.showInputDialog("Nom du marché :");
-		}
-		return result;
-	}
-	
 	private void launch() {
 		java.awt.EventQueue.invokeLater(new Runnable() {
             @Override
@@ -212,7 +204,7 @@ public class VendeurInterface extends JFrame {
 				if(timer<=0 || timer>60)
 					throw new Exception("Le timer doit être un entier entre ]0..60].");
 				
-				_papa.setAmount(amount+stepAmount); //+step car erreur sur le premier doWait de l'agent
+				_papa.setAmount(amount);
 				_papa.setMinAmount(minAmount);
 				_papa.setStepAmount(stepAmount);
 				_papa.setTimer(timer);

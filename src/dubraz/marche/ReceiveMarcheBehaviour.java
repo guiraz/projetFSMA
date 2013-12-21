@@ -20,20 +20,20 @@ public class ReceiveMarcheBehaviour extends CyclicBehaviour {
 			
 			if(msg.getPerformative() == Protocol.TO_ANNOUNCE.getProtocol()) {
 				Float amount = Float.parseFloat(msg.getContent());
-				_papa.setAnnounce(msg.getSender().getLocalName().toString(), amount);
+				_papa.setAnnounce(msg.getSender().getLocalName(), amount);
 			}
 			
 			if(msg.getPerformative() == Protocol.TO_CREATE.getProtocol()) {
-				if(msg.getContent() == "client") {
-					if(!_papa.createClient(msg.getSender().getLocalName())){
-						ACLMessage response = new ACLMessage(Protocol.TO_DECLINE.getProtocol());
-						response.addReceiver(msg.getSender());
-						_papa.send(response);
-					}
+				if(msg.getContent().equals("client")) {
+					_papa.createClient(msg.getSender().getLocalName());
 				}
-				else {
-					//todo
+			
+				if(msg.getContent().equals("vendeur")) {
+					_papa.createVendeur(msg.getSender().getLocalName());
 				}
+			}
+			
+			if(msg.getPerformative() == Protocol.TO_BID.getProtocol()) {
 			}
 			
 		}

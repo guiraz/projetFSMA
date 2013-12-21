@@ -4,13 +4,13 @@ import utilities.Protocol;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
 
-public class ReceiveMessageVendeurBehaviour extends CyclicBehaviour {
+public class ReceiveVendeurBehaviour extends CyclicBehaviour {
 
 	private static final long serialVersionUID = 1L;
 	
 	private Vendeur _papa;
 	
-	public ReceiveMessageVendeurBehaviour(Vendeur papa) {
+	public ReceiveVendeurBehaviour(Vendeur papa) {
 		_papa = papa;
 	}
 
@@ -27,10 +27,6 @@ public class ReceiveMessageVendeurBehaviour extends CyclicBehaviour {
 			
 			if(msg.getPerformative() == Protocol.TO_PAY.getProtocol()) {
 				_papa.payment(msg.getContent());
-			}
-			
-			if(msg.getPerformative() == Protocol.TO_DECLINE.getProtocol()) {
-				_papa.nameAlreadyExist();
 			}
 		}
 		else
