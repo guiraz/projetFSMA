@@ -77,7 +77,10 @@ public class MarcheInterface extends JFrame {
 		Object[][] d = new Object[names.size()][2];
 		for(int i=0; i<names.size(); i++) {
 			d[i][0] = names.get(i);
-			d[i][1] = amounts.get(i);
+			if(amounts.get(i) >= 0)
+				d[i][1] = amounts.get(i);
+			else
+				d[i][1] = "n/c";
 		}
 		
 		_table.setModel(new MyTableModel(d, new String[] {"Vendeur","Prix"}));

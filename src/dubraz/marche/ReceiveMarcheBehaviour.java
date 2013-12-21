@@ -34,6 +34,28 @@ public class ReceiveMarcheBehaviour extends CyclicBehaviour {
 			}
 			
 			if(msg.getPerformative() == Protocol.TO_BID.getProtocol()) {
+				String[] receiver = new String[] {msg.getContent()};
+				_papa.toBid(msg.getSender().getLocalName(), receiver);
+			}
+			
+			if(msg.getPerformative() == Protocol.TO_DECLINE.getProtocol()) {
+				String[] receiver = msg.getContent().split("~");
+				_papa.toDecline(msg.getSender().getLocalName(), receiver);
+			}
+			
+			if(msg.getPerformative() == Protocol.TO_ATTRIBUTE.getProtocol()) {
+				String[] receiver = new String[] {msg.getContent()};
+				_papa.toAttribute(msg.getSender().getLocalName(), receiver);
+			}
+			
+			if(msg.getPerformative() == Protocol.TO_GIVE.getProtocol()) {
+				String[] receiver = new String[] {msg.getContent()};
+				_papa.toGive(msg.getSender().getLocalName(), receiver);
+			}
+			
+			if(msg.getPerformative() == Protocol.TO_PAY.getProtocol()) {
+				String[] receiver = new String[] {msg.getContent()};
+				_papa.toPay(msg.getSender().getLocalName(), receiver);
 			}
 			
 		}

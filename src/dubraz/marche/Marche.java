@@ -22,7 +22,7 @@ public class Marche extends Agent {
 	@Override
 	protected void setup() {
 		
-		System.out.println("Hello! Le Marché d'Ordralfabétix "+getAID().getLocalName()+" is ready.");
+		System.out.println("Hello! Le Marché "+getAID().getLocalName()+" is ready.");
 		_sellersNames = new ArrayList<String>();
 		_buyersNames = new ArrayList<String>();
 		_amounts = new ArrayList<Float>();
@@ -35,7 +35,7 @@ public class Marche extends Agent {
 	protected void takeDown() {
 		if(_gui != null)
 			_gui.dispose();
-		System.out.println("Le Marché d'Ordralfabétix "+getAID().getName()+" is terminating.");
+		System.out.println("Le Marché "+getAID().getName()+" is terminating.");
 		super.takeDown();
 	}
 	
@@ -55,9 +55,7 @@ public class Marche extends Agent {
 		_gui.RessourcesUpdated();
 		
 		String mess = name + "~" + amount.toString();
-		String[] bn = new String[_buyersNames.size()];
-		for(int i=0; i<_buyersNames.size(); i++)
-			bn[i] = _buyersNames.get(i);
+		String[] bn = getStringArray(_buyersNames);
 		if(bn.length > 0)
 			addBehaviour(new OneMessageBehaviour(this, bn, Protocol.TO_ANNOUNCE, mess));
 	}
@@ -82,6 +80,38 @@ public class Marche extends Agent {
 	
 	public List<Float> getAmounts() {
 		return _amounts;
+	}
+
+	public void toBid(String buyer, String[] seller) {
+		addBehaviour(new OneMessageBehaviour(this, seller, Protocol.TO_BID, buyer));
+	}
+
+	public void toDecline(String seller, String[] buyers) {
+		addBehaviour(new OneMessageBehaviour(this, buyers, Protocol.TO_DECLINE, seller));
+	}
+
+	public void toAttribute(String seller, String[] buyer) {
+		addBehaviour(new OneMessageBehaviour(this, buyer, Protocol.TO_ATTRIBUTE, seller));
+		
+		int idSeller = _sellersNames.indexOf(seller);
+		_amounts.set(idSeller, new Float(-1));
+		String[] receiver = getStringArray(_buyersNames);
+		addBehaviour(new OneMessageBehaviour(this, receiver, Protocol.TO_ANNOUNCE, _amounts.get(idSeller).toString()));
+	}
+	
+	private String[] getStringArray(List<String> ls) {
+		String[] result = new String[ls.size()];
+		for(int i=0; i<ls.size(); i++)
+			result[i] = ls.get(i);
+		return result;
+	}
+
+	public void toGive(String seller, String[] buyer) {
+		addBehaviour(new OneMessageBehaviour(this, buyer, Protocol.TO_GIVE, seller));
+	}
+
+	public void toPay(String buyer, String[] seller) {
+		addBehaviour(new OneMessageBehaviour(this, seller, Protocol.TO_PAY, buyer));
 	}
 
 }
