@@ -77,6 +77,10 @@ public class AcheteurInterface extends JFrame {
 		JOptionPane.showMessageDialog(this, mess, "Error", JOptionPane.ERROR_MESSAGE);
 	}
 	
+	public void InfoMessage(String mess) {
+		JOptionPane.showMessageDialog(this, mess, "Information", JOptionPane.INFORMATION_MESSAGE);
+	}
+	
 	public void ressourcesUpdated() {
 		Object[][] data = new Object[_papa.getSellersNames().size()][2];
 		for(int i=0; i<_papa.getSellersNames().size(); i++) {
@@ -119,6 +123,31 @@ public class AcheteurInterface extends JFrame {
 	
 	private void ActionBid(ActionEvent e) {
 		//todo
+	}
+
+	public boolean getBidProcess() {
+		String[] possibilities = new String[] {"Manuel", "Automatique"};
+		String response = (String) JOptionPane.showInputDialog(null, "Quel type de fonctionnement voulez-vous utiliser pour les enchères?", "Types des enchères", JOptionPane.QUESTION_MESSAGE, null, possibilities, possibilities[0]);
+		if(response.equals("Manuel"))
+			return false;
+		else
+			return true;
+	}
+
+	public Float getDefaultAmount() {
+		Float result = null;
+		while(result == null) {
+			String response = JOptionPane.showInputDialog("Quel est le montant maximum des enchères?");
+			try{
+				result = Float.parseFloat(response);
+				if(result<0)
+					throw new Exception();
+			}catch(Exception e) {
+				ErrorMessage("Le montant maximum doit être un nombre réel positif.");
+				result = null;
+			}
+		}
+		return result;
 	}
 
 }

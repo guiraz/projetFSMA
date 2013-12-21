@@ -12,6 +12,8 @@ public class Acheteur extends Agent {
 
 	private static final long serialVersionUID = 1L;
 	
+	private boolean _automatique;
+	private Float _defaultAmount;
 	private List<String> _sellersNames;
 	private List<Float> _amounts;
 	private final String _marcketName = "marché";
@@ -25,6 +27,11 @@ public class Acheteur extends Agent {
 		_amounts = new ArrayList<Float>();
 		
 		_gui = new AcheteurInterface(this);
+		
+		_automatique = _gui.getBidProcess();
+		
+		if(_automatique)
+			_defaultAmount = _gui.getDefaultAmount();
 		
 		String[] receivers = new String[] {_marcketName};
 		addBehaviour(new OneMessageBehaviour(this, receivers, Protocol.TO_CREATE, "client"));

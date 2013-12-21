@@ -10,14 +10,12 @@ import jade.core.Agent;
 
 public class Marche extends Agent {
 	
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 	private MarcheInterface _gui;
 	private volatile List<String> _sellersNames;
 	private volatile List<String> _buyersNames;
 	private volatile List<Float> _amounts;
+	private static boolean _singleton = false;
 
 	@Override
 	protected void setup() {
@@ -28,6 +26,22 @@ public class Marche extends Agent {
 		_amounts = new ArrayList<Float>();
 		_gui = new MarcheInterface(this);
 		
+		//Une seule instance de l'agent Marche peut être créé
+		if(_singleton){
+			_gui.ErrorMessage("Un agent marché est déjà lancé. Arrêt de l'agent.");
+			stop();
+			return;
+		}
+		else
+			_singleton = true;
+		
+		//L'agent doit être nommé 'marché' pour pouvoir communiquer
+		if(!getLocalName().equals("marché")) {
+			_gui.ErrorMessage("L'agent doit être nommé : 'marché'. Arrêt de l'agent.");
+			stop();
+			return;
+		}
+		
 		addBehaviour(new ReceiveMarcheBehaviour(this));
 	}
 
@@ -36,6 +50,7 @@ public class Marche extends Agent {
 		if(_gui != null)
 			_gui.dispose();
 		System.out.println("Le Marché "+getAID().getName()+" is terminating.");
+		_singleton = false;
 		super.takeDown();
 	}
 	

@@ -131,6 +131,10 @@ public class VendeurInterface extends JFrame {
 		JOptionPane.showMessageDialog(this, mess, "Error", JOptionPane.ERROR_MESSAGE);
 	}
 	
+	public void InfoMessage(String mess) {
+		JOptionPane.showMessageDialog(this, mess, "Information", JOptionPane.INFORMATION_MESSAGE);
+	}
+	
 	public void reset() {
 		_timerTextField.setEditable(true);
 		_amountTextField.setEditable(true);
@@ -208,12 +212,12 @@ public class VendeurInterface extends JFrame {
 				_papa.setMinAmount(minAmount);
 				_papa.setStepAmount(stepAmount);
 				_papa.setTimer(timer);
-				_papa.announce();
 				_buttonAnnounce.setEnabled(false);
 				_timerTextField.setEditable(false);
 				_amountTextField.setEditable(false);
 				_minAmountTextField.setEditable(false);
 				_stepAmountTextField.setEditable(false);
+				_papa.announce();
 			}
 			catch(Exception e) {
 				if(e.getClass() == new NumberFormatException().getClass())

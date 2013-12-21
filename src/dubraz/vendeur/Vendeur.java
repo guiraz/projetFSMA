@@ -117,13 +117,13 @@ public class Vendeur extends Agent {
 		_announcing = true;
 		String[] receiver = new String[] {_marcketName};
 		addBehaviour( new OneMessageBehaviour(this, receiver, Protocol.TO_ANNOUNCE, _amount.toString()));
-		try{Thread.sleep(_timer*1000);}catch(Exception e){System.err.println("Sleep failed");}
+		addBehaviour(new WaitBehaviour(this));
 		addBehaviour(new ProposalVendeurBehaviour(this, true));
 	}
 	
 	//Une enchère reçu aprés timeout, on relance le timeout pour une autre enchère.
 	public void waitOtherBids() {
-		try{Thread.sleep(_timer*1000);}catch(Exception e){System.err.println("Sleep failed");}
+		addBehaviour(new WaitBehaviour(this));
 		addBehaviour(new ProposalVendeurBehaviour(this, false));
 	}
 	
@@ -142,14 +142,14 @@ public class Vendeur extends Agent {
 	
 	//Réception du paiement - fin del'offre
 	public void payment(String clName) {
-		_gui.ErrorMessage("Paiement reçu de " + clName + ".");
+		_gui.InfoMessage("Paiement reçu de " + clName + ".");
 		reset();
 	}
 
 	//Prix minimum atteint - fin de l'offre
 	public void noBids() {
 		_announcing = false;
-		_gui.ErrorMessage("Prix minimum atteint et aucune enchère!");
+		_gui.InfoMessage("Prix minimum atteint et aucune enchère!");
 		String[] receiver = new String[] {_marcketName};
 		addBehaviour( new OneMessageBehaviour(this, receiver, Protocol.TO_ANNOUNCE, new Float(-1).toString()));
 		reset();

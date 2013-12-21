@@ -86,6 +86,10 @@ public class MarcheInterface extends JFrame {
 		_table.setModel(new MyTableModel(d, new String[] {"Vendeur","Prix"}));
 	}
 	
+	public void ErrorMessage(String mess) {
+		JOptionPane.showMessageDialog(this, mess, "Error", JOptionPane.ERROR_MESSAGE);
+	}
+	
 	private void launch() {
 		java.awt.EventQueue.invokeLater(new Runnable() {
             @Override
