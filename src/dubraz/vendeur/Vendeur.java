@@ -53,32 +53,16 @@ public class Vendeur extends Agent {
 	}
 	
 	public void addClient(String cl) {
-		if(getClientIndex(cl) == -1)
+		if(!_namesClients.contains(cl))
 			_namesClients.add(cl);
 		_gui.update();
 	}
 	
 	public String getClient(int i) {
-		if(getNbClients()>0)
+		if(getNbClients()>0 && i<getNbClients() && i>=0)
 			return _namesClients.get(i);
 		else
 			return null;
-	}
-	
-	public int getClientIndex(String cl) {
-		boolean find = false;
-		int i=0;
-		while (i<getNbClients() && !find) {
-			if(_namesClients.get(i).equals(cl))
-				find = true;
-			else
-				i++;
-		}
-		
-		if(find)
-			return i;
-		else
-			return -1;
 	}
 	
 	public int getNbClients(){
@@ -97,6 +81,7 @@ public class Vendeur extends Agent {
 		return _announcing;
 	}
 	
+	//Constructeur de l'agent
 	protected void setup() {
 		System.out.println("Hello! Vendeur-agent "+getAID().getName()+" is ready.");
 		
@@ -106,54 +91,91 @@ public class Vendeur extends Agent {
 		_namesClients = new ArrayList<String>();
 		_gui = new VendeurInterface(this);
 
-		String[] receivers = new String[] {_marcketName};
-		addBehaviour(new OneMessageBehaviour(this, receivers, Protocol.TO_CREATE, "vendeur"));
+		//Requête de souscription au marché
+		String[] receiver = new String[] {_marcketName};
+		addBehaviour(new OneMessageBehaviour(this, receiver, Protocol.TO_CREATE, "vendeur"));
+		
+		//Comportement d'écoute de message
 		addBehaviour(new ReceiveVendeurBehaviour(this));
 	}
 	
+	//Destructeur
 	protected void takeDown() {
 		_gui.dispose();
         System.out.println("Vendeur-agent "+getAID().getName()+" terminating.");
         super.takeDown();
     }
 	
+	//Appel du destructeur
 	public void stop() {
 		doDelete();
 	}
 	
+	//Publication d'une offre et attente d'enchère
 	public void announce() {
 		_gui.update();
 		_announcing = true;
-		String[] receivers = new String[] {_marcketName};
-		addBehaviour( new OneMessageBehaviour(this, receivers, Protocol.TO_ANNOUNCE, _amount.toString()));
-		doWait(_timer*1000);
-		addBehaviour(new ProposalVendeurBehaviour(this));
+		String[] receiver = new String[] {_marcketName};
+		addBehaviour( new OneMessageBehaviour(this, receiver, Protocol.TO_ANNOUNCE, _amount.toString()));
+		try{Thread.sleep(_timer*1000);}catch(Exception e){System.err.println("Sleep failed");}
+		addBehaviour(new ProposalVendeurBehaviour(this, true));
 	}
 	
-	
-	//Aucun acheteur, redemander le prix et le timeout
-	public void reset() {
-		_announcing = false;
-		_amount = new Float(0);
-		_timer = new Long(0);
-		_namesClients.clear();
-		_gui.ErrorMessage("Pas d'enchérisseur, veuillez resaisir les données.");
-		_gui.reset();
+	//Une enchère reçu aprés timeout, on relance le timeout pour une autre enchère.
+	public void waitOtherBids() {
+		try{Thread.sleep(_timer*1000);}catch(Exception e){System.err.println("Sleep failed");}
+		addBehaviour(new ProposalVendeurBehaviour(this, false));
 	}
 	
-	//timeout done attribuer l'enchérisseur
+	//Attribuer le gagnant de l'enchère
 	public void attribute() {
 		_announcing = false;
-		String[] receivers = new String[] {_marcketName};
-		addBehaviour(new OneMessageBehaviour(this, receivers, Protocol.TO_ATTRIBUTE, getClient(0)));
+		String[] receiver = new String[] {_marcketName};
+		addBehaviour(new OneMessageBehaviour(this, receiver, Protocol.TO_ATTRIBUTE, getClient(0)));
 	}
 	
+	//Envoi du bien
+	public void give() {
+		String[] receiver = new String[] {_marcketName};
+		addBehaviour(new OneMessageBehaviour(this, receiver, Protocol.TO_GIVE, getClient(0)));
+	}
+	
+	//Réception du paiement - fin del'offre
 	public void payment(String clName) {
+		_gui.ErrorMessage("Paiement reçu de " + clName + ".");
+		reset();
+	}
+
+	//Prix minimum atteint - fin de l'offre
+	public void noBids() {
+		_announcing = false;
+		_gui.ErrorMessage("Prix minimum atteint et aucune enchère!");
+		String[] receiver = new String[] {_marcketName};
+		addBehaviour( new OneMessageBehaviour(this, receiver, Protocol.TO_ANNOUNCE, new Float(-1).toString()));
+		reset();
+	}
+	
+	//Remise à zéro aprés la fin d'une offre
+	public void reset() {
 		_amount = new Float(0);
 		_timer = new Long(0);
+		_minAmount = new Float(0);
+		_stepAmount = new Float(0);
 		_namesClients.clear();
-		_gui.ErrorMessage("Paiement reçude " + clName + ".");
 		_gui.reset();
+	}
+
+	//Décliner une enchère
+	public void decline(String buyer) {
+		String[] receiver = new String[] {_marcketName};
+		addBehaviour(new OneMessageBehaviour(this, receiver, Protocol.TO_DECLINE, buyer));
+	}
+
+	//Décliner toute les enchères
+	public void declineAll() {
+		String[] receiver = new String[] {_marcketName};
+		for(int i=0; i<getNbClients(); i++)
+			addBehaviour(new OneMessageBehaviour(this, receiver, Protocol.TO_DECLINE, getClient(i)));
 	}
 	
 }

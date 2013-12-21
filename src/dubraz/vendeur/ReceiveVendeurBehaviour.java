@@ -19,12 +19,16 @@ public class ReceiveVendeurBehaviour extends CyclicBehaviour {
 		ACLMessage msg = _papa.receive();
 		if(msg != null) {
 			
+			//Réception d'une enchère
 			if(msg.getPerformative() == Protocol.TO_BID.getProtocol()) {
 				if(_papa.getAnnouncing()) {
 					_papa.addClient(msg.getContent());
 				}
+				else
+					_papa.decline(msg.getContent());
 			}
 			
+			//Réception de paiement
 			if(msg.getPerformative() == Protocol.TO_PAY.getProtocol()) {
 				_papa.payment(msg.getContent());
 			}

@@ -45,7 +45,6 @@ public class Marche extends Agent {
 	
 	public void setAnnounce(String name, Float amount) {
 		if(_sellersNames.contains(name)) {
-			System.out.println(_sellersNames.indexOf(name) + " " + amount);
 			_amounts.set(_sellersNames.indexOf(name), amount);
 		}
 		else {
