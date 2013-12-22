@@ -35,9 +35,9 @@ public class Marche extends Agent {
 		else
 			_singleton = true;
 		
-		//L'agent doit être nommé 'marché' pour pouvoir communiquer
-		if(!getLocalName().equals("marché")) {
-			_gui.ErrorMessage("L'agent doit être nommé : 'marché'. Arrêt de l'agent.");
+		//L'agent doit être nommé 'marche' pour pouvoir communiquer
+		if(!getLocalName().equals("marche")) {
+			_gui.ErrorMessage("L'agent doit être nommé : 'marche'. Arrêt de l'agent.");
 			stop();
 			return;
 		}

@@ -16,7 +16,7 @@ public class Acheteur extends Agent {
 	private Float _defaultAmount;
 	private List<String> _sellersNames;
 	private List<Float> _amounts;
-	private final String _marcketName = "marché";
+	private final String _marcketName = "marche";
 	
 	private AcheteurInterface _gui;
 	

@@ -16,7 +16,7 @@ public class Vendeur extends Agent {
 	private Float _stepAmount;
 	private Long _timer;
 	private List<String> _namesClients;
-	private final String _marcketName = "marché";
+	private final String _marcketName = "marche";
 	private VendeurInterface _gui;
 	private boolean _announcing;
 	
