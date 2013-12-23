@@ -53,9 +53,9 @@ public class Acheteur extends Agent {
     }
 	
 	public void stop() {
-		_tbf.interrupt();
 		String[] receivers = new String[] {_marcketName};
-		addBehaviour(new OneMessageBehaviour(this, receivers, Protocol.TO_KILL, "client"));
+		addBehaviour(_tbf.wrap(new OneMessageBehaviour(this, receivers, Protocol.TO_KILL, "client")));
+		_tbf.interrupt();
 		doDelete();
 	}
 	
@@ -80,6 +80,9 @@ public class Acheteur extends Agent {
 			_amounts.add(a);
 		}
 		_gui.ressourcesUpdated();
+		
+		if(_automatique)
+			autoBid();
 	}
 	
 	public String getSellerBid() {
@@ -97,12 +100,9 @@ public class Acheteur extends Agent {
 	}
 
 	public void decline() {
-		if(_automatique) {
-		}
-		else {
-			_gui.InfoMessage("Votre offre a été décliné.");
-		}
 		_sellerBid = null;
+		if(!_automatique)
+			_gui.InfoMessage("Votre offre a été décliné.");
 		_gui.ressourcesUpdated();
 	}
 
@@ -122,5 +122,16 @@ public class Acheteur extends Agent {
 	private void bidFinished() {
 		if(_pay && _give)
 			stop();
+	}
+	
+	private void autoBid(){
+		if(_sellerBid == null) {
+			int i=0;
+			while(i<_amounts.size() && _sellerBid==null){
+				if(_amounts.get(i) <= _defaultAmount)
+					_sellerBid = new String(_sellersNames.get(i));
+			}
+			bid();
+		}
 	}
 }

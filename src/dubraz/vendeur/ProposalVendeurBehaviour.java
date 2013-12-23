@@ -39,6 +39,7 @@ public class ProposalVendeurBehaviour extends OneShotBehaviour {
 			//Si plusieurs enchères
 			default :
 					_papa.declineAll();
+					_papa.resetClient();
 					float amount2 = _papa.getAmount();
 	                amount2 += _papa.getStepAmount();
 	                _papa.setAmount(amount2);

@@ -112,9 +112,9 @@ public class Vendeur extends Agent {
 	
 	//Appel du destructeur
 	public void stop() {
-		_tbf.interrupt();
 		String[] receivers = new String[] {_marcketName};
-		addBehaviour(new OneMessageBehaviour(this, receivers, Protocol.TO_KILL, "vendeur"));
+		addBehaviour(_tbf.wrap(new OneMessageBehaviour(this, receivers, Protocol.TO_KILL, "vendeur")));
+		_tbf.interrupt();
 		doDelete();
 	}
 	
@@ -184,6 +184,10 @@ public class Vendeur extends Agent {
 	public void declineAll() {
 		for(int i=0; i<getNbClients(); i++)
 			decline(getClient(i));
+	}
+
+	public void resetClient() {
+		_namesClients.clear();
 	}
 	
 }
