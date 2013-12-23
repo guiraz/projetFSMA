@@ -36,8 +36,10 @@ public class Acheteur extends Agent {
 		_pay = false;
 		_give = false;
 		
-		if(_automatique)
+		if(_automatique){
 			_defaultAmount = _gui.getDefaultAmount();
+			_gui.setLabelAmount();
+		}
 		
 		String[] receivers = new String[] {_marcketName};
 		addBehaviour(new OneMessageBehaviour(this, receivers, Protocol.TO_CREATE, "client"));
@@ -91,6 +93,10 @@ public class Acheteur extends Agent {
 	
 	public void setSellerBid(String sb) {
 		_sellerBid = new String(sb);
+	}
+	
+	public Float getDefaultAmount() {
+		return _defaultAmount;
 	}
 
 	public void give(String seller) {

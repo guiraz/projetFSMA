@@ -17,6 +17,7 @@ public class AcheteurInterface extends JFrame {
 	private JButton _buttonBid;
 	private JTable _table;
 	private JScrollPane _scrollPane;
+	private JLabel _labelDefaultAmount;
 	
 	public AcheteurInterface(Acheteur papa) {
 		_papa = papa;
@@ -47,6 +48,8 @@ public class AcheteurInterface extends JFrame {
 		_scrollPane.setViewportView(_table);
 		_scrollPane.setMinimumSize(new Dimension(200, 200));
 		
+		_labelDefaultAmount = new JLabel("");
+		
 		javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         
@@ -57,6 +60,7 @@ public class AcheteurInterface extends JFrame {
                 layout.createSequentialGroup()
                 	.addComponent(_scrollPane)
                 	.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
+                			.addComponent(_labelDefaultAmount)
                 			.addComponent(_buttonBid)
                 			.addComponent(_buttonQuit))
         );
@@ -64,7 +68,9 @@ public class AcheteurInterface extends JFrame {
                 layout.createSequentialGroup()
 	                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
             			.addComponent(_scrollPane)
-            			.addComponent(_buttonBid))
+            			.addGroup(layout.createSequentialGroup()
+        					.addComponent(_labelDefaultAmount)
+        					.addComponent(_buttonBid)))
         			.addComponent(_buttonQuit)
         );
         
@@ -160,6 +166,10 @@ public class AcheteurInterface extends JFrame {
 			}
 		}
 		return result;
+	}
+
+	public void setLabelAmount() {
+		_labelDefaultAmount.setText("Enchères max : " + _papa.getDefaultAmount());
 	}
 
 }
