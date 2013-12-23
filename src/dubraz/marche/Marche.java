@@ -76,7 +76,6 @@ public class Marche extends Agent {
 	
 	public void createClient(String name) {
 		_buyersNames.add(name);
-		System.out.println(_buyersNames.size());
 	}
 	
 	public void createVendeur(String name) {
@@ -106,11 +105,6 @@ public class Marche extends Agent {
 
 	public void toAttribute(String seller, String[] buyer) {
 		addBehaviour(new OneMessageBehaviour(this, buyer, Protocol.TO_ATTRIBUTE, seller));
-		
-		int idSeller = _sellersNames.indexOf(seller);
-		_amounts.set(idSeller, new Float(-1));
-		String[] receiver = getStringArray(_buyersNames);
-		addBehaviour(new OneMessageBehaviour(this, receiver, Protocol.TO_ANNOUNCE, _amounts.get(idSeller).toString()));
 	}
 	
 	private String[] getStringArray(List<String> ls) {
@@ -126,6 +120,17 @@ public class Marche extends Agent {
 
 	public void toPay(String buyer, String[] seller) {
 		addBehaviour(new OneMessageBehaviour(this, seller, Protocol.TO_PAY, buyer));
+	}
+
+	public void killClient(String buyer) {
+		_buyersNames.remove(buyer);
+	}
+
+	public void killVendeur(String seller) {
+		int id = _sellersNames.indexOf(seller);
+		_sellersNames.remove(id);
+		_amounts.remove(id);
+		_gui.RessourcesUpdated();
 	}
 
 }

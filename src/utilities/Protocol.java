@@ -4,6 +4,7 @@ import jade.lang.acl.ACLMessage;
 
 public enum Protocol {
 	TO_CREATE (ACLMessage.SUBSCRIBE),			//Créer un acheteur ou un vendeur
+	TO_KILL (ACLMessage.CANCEL),				//Tuer un acheteur ou un vendeur
 	TO_ANNOUNCE (ACLMessage.CFP),				//Annonce des offres
 	TO_BID (ACLMessage.PROPOSE),				//L'acheteur enchéris sur une offre
 	TO_ATTRIBUTE (ACLMessage.ACCEPT_PROPOSAL),	//Le vendeur définis l'enchère gagnante 

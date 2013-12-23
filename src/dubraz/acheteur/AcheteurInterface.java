@@ -85,14 +85,18 @@ public class AcheteurInterface extends JFrame {
 		Object[][] data = new Object[_papa.getSellersNames().size()][2];
 		for(int i=0; i<_papa.getSellersNames().size(); i++) {
 			data[i][0] = _papa.getSellersNames().get(i);
-			data[i][1] = _papa.getAmounts().get(i);
+			if(_papa.getAmounts().get(i) >= 0)
+				data[i][1] = _papa.getAmounts().get(i);
+			else
+				data[i][1] = new String("n/c");
 		}
 		
 		String[] columnsNames = new String[] {"Vendeur", "Prix"};
 		_table.setModel(new MyTableModel(data, columnsNames));
 		
 		if(_papa.getSellersNames().size() > 0)
-			_buttonBid.setEnabled(true);
+			if(!_papa.isAutomatique() && _papa.getSellerBid()==null)
+				_buttonBid.setEnabled(true);
 		else
 			_buttonBid.setEnabled(false);
 	}
@@ -121,8 +125,16 @@ public class AcheteurInterface extends JFrame {
         }
 	}
 	
-	private void ActionBid(ActionEvent e) {
-		//todo
+	private void ActionBid(ActionEvent ae) {
+		String sBid = (String) _table.getModel().getValueAt(_table.getSelectedRow(), 0);
+		try{
+			Float amount = (Float) _table.getModel().getValueAt(_table.getSelectedRow(), 1);
+			_buttonBid.setEnabled(false);
+			_papa.setSellerBid(sBid);
+			_papa.bid();
+		}catch(Exception e){
+			ErrorMessage("Pas d'offre pour ce vendeur.");
+		}
 	}
 
 	public boolean getBidProcess() {

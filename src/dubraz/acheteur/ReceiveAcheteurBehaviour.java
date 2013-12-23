@@ -19,12 +19,21 @@ public class ReceiveAcheteurBehaviour extends CyclicBehaviour {
 		ACLMessage msg = myAgent.receive();
 		if (msg != null){
 			
-			if(msg.getPerformative() == Protocol.TO_DECLINE.getProtocol()) {
-			}
-			
 			if(msg.getPerformative() == Protocol.TO_ANNOUNCE.getProtocol()) {
 				String[] content = msg.getContent().split("~");
 				_papa.addOffer(content[0], Float.parseFloat(content[1]));
+			}
+			
+			if(msg.getPerformative() == Protocol.TO_DECLINE.getProtocol()) {
+				_papa.decline();
+			}
+			
+			if(msg.getPerformative() == Protocol.TO_ATTRIBUTE.getProtocol()) {
+				_papa.attribute(msg.getContent());
+			}
+			
+			if(msg.getPerformative() == Protocol.TO_GIVE.getProtocol()) {
+				_papa.give(msg.getContent());
 			}
 			
 		}

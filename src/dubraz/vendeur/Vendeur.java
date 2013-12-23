@@ -7,6 +7,7 @@ import utilities.OneMessageBehaviour;
 import utilities.Protocol;
 
 import jade.core.Agent;
+import jade.core.behaviours.ThreadedBehaviourFactory;
 
 public class Vendeur extends Agent {
 
@@ -19,6 +20,7 @@ public class Vendeur extends Agent {
 	private final String _marcketName = "marche";
 	private VendeurInterface _gui;
 	private boolean _announcing;
+	private ThreadedBehaviourFactory _tbf;
 	
 	public Float getAmount() {
 		return _amount;
@@ -95,8 +97,10 @@ public class Vendeur extends Agent {
 		String[] receiver = new String[] {_marcketName};
 		addBehaviour(new OneMessageBehaviour(this, receiver, Protocol.TO_CREATE, "vendeur"));
 		
-		//Comportement d'écoute de message
-		addBehaviour(new ReceiveVendeurBehaviour(this));
+		//Comportement d'écoute de message (behaviour threadé)
+		ReceiveVendeurBehaviour rvb = new ReceiveVendeurBehaviour(this);
+		_tbf = new ThreadedBehaviourFactory();
+		addBehaviour(_tbf.wrap(rvb));
 	}
 	
 	//Destructeur
@@ -108,6 +112,9 @@ public class Vendeur extends Agent {
 	
 	//Appel du destructeur
 	public void stop() {
+		_tbf.interrupt();
+		String[] receivers = new String[] {_marcketName};
+		addBehaviour(new OneMessageBehaviour(this, receivers, Protocol.TO_KILL, "vendeur"));
 		doDelete();
 	}
 	
@@ -130,8 +137,10 @@ public class Vendeur extends Agent {
 	//Attribuer le gagnant de l'enchère
 	public void attribute() {
 		_announcing = false;
+		_gui.InfoMessage(getClient(0) + " a gagné votre enchère.");
 		String[] receiver = new String[] {_marcketName};
 		addBehaviour(new OneMessageBehaviour(this, receiver, Protocol.TO_ATTRIBUTE, getClient(0)));
+		give();
 	}
 	
 	//Envoi du bien
@@ -150,13 +159,13 @@ public class Vendeur extends Agent {
 	public void noBids() {
 		_announcing = false;
 		_gui.InfoMessage("Prix minimum atteint et aucune enchère!");
-		String[] receiver = new String[] {_marcketName};
-		addBehaviour( new OneMessageBehaviour(this, receiver, Protocol.TO_ANNOUNCE, new Float(-1).toString()));
 		reset();
 	}
 	
 	//Remise à zéro aprés la fin d'une offre
 	public void reset() {
+		String[] receiver = new String[] {_marcketName};
+		addBehaviour( new OneMessageBehaviour(this, receiver, Protocol.TO_ANNOUNCE, new Float(-1).toString()));
 		_amount = new Float(0);
 		_timer = new Long(0);
 		_minAmount = new Float(0);
@@ -173,9 +182,8 @@ public class Vendeur extends Agent {
 
 	//Décliner toute les enchères
 	public void declineAll() {
-		String[] receiver = new String[] {_marcketName};
 		for(int i=0; i<getNbClients(); i++)
-			addBehaviour(new OneMessageBehaviour(this, receiver, Protocol.TO_DECLINE, getClient(i)));
+			decline(getClient(i));
 	}
 	
 }

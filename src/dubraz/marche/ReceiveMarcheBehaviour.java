@@ -33,6 +33,16 @@ public class ReceiveMarcheBehaviour extends CyclicBehaviour {
 				}
 			}
 			
+			if(msg.getPerformative() == Protocol.TO_KILL.getProtocol()) {
+				if(msg.getContent().equals("client")) {
+					_papa.killClient(msg.getSender().getLocalName());
+				}
+			
+				if(msg.getContent().equals("vendeur")) {
+					_papa.killVendeur(msg.getSender().getLocalName());
+				}
+			}
+			
 			if(msg.getPerformative() == Protocol.TO_BID.getProtocol()) {
 				String[] receiver = new String[] {msg.getContent()};
 				_papa.toBid(msg.getSender().getLocalName(), receiver);
