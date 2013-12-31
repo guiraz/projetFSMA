@@ -11,6 +11,7 @@
 
 For windows PATH var
 set path=%path%;C:\Program Files\Java\jdkX.X.X_XX\bin
+and reboot the system !!!
 
 On linux it should be done by default.
 
