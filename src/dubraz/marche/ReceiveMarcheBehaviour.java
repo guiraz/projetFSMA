@@ -18,11 +18,6 @@ public class ReceiveMarcheBehaviour extends CyclicBehaviour {
 		ACLMessage msg = myAgent.receive();
 		if (msg != null){
 			
-			if(msg.getPerformative() == Protocol.TO_ANNOUNCE.getProtocol()) {
-				Float amount = Float.parseFloat(msg.getContent());
-				_papa.setAnnounce(msg.getSender().getLocalName(), amount);
-			}
-			
 			if(msg.getPerformative() == Protocol.TO_CREATE.getProtocol()) {
 				if(msg.getContent().equals("client")) {
 					_papa.createClient(msg.getSender().getLocalName());
@@ -43,29 +38,28 @@ public class ReceiveMarcheBehaviour extends CyclicBehaviour {
 				}
 			}
 			
+			if(msg.getPerformative() == Protocol.TO_ANNOUNCE.getProtocol()) {
+				_papa.setAnnounce(msg);
+			}
+			
 			if(msg.getPerformative() == Protocol.TO_BID.getProtocol()) {
-				String[] receiver = new String[] {msg.getContent()};
-				_papa.toBid(msg.getSender().getLocalName(), receiver);
+				_papa.toBid(msg);
 			}
 			
 			if(msg.getPerformative() == Protocol.TO_DECLINE.getProtocol()) {
-				String[] receiver = msg.getContent().split("~");
-				_papa.toDecline(msg.getSender().getLocalName(), receiver);
+				_papa.toDecline(msg);
 			}
 			
 			if(msg.getPerformative() == Protocol.TO_ATTRIBUTE.getProtocol()) {
-				String[] receiver = new String[] {msg.getContent()};
-				_papa.toAttribute(msg.getSender().getLocalName(), receiver);
+				_papa.toAttribute(msg);
 			}
 			
 			if(msg.getPerformative() == Protocol.TO_GIVE.getProtocol()) {
-				String[] receiver = new String[] {msg.getContent()};
-				_papa.toGive(msg.getSender().getLocalName(), receiver);
+				_papa.toGive(msg);
 			}
 			
 			if(msg.getPerformative() == Protocol.TO_PAY.getProtocol()) {
-				String[] receiver = new String[] {msg.getContent()};
-				_papa.toPay(msg.getSender().getLocalName(), receiver);
+				_papa.toPay(msg);
 			}
 			
 		}

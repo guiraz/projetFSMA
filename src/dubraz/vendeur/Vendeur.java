@@ -3,8 +3,7 @@ package dubraz.vendeur;
 import java.util.ArrayList;
 import java.util.List;
 
-import utilities.OneMessageBehaviour;
-import utilities.Protocol;
+import utilities.*;
 
 import jade.core.Agent;
 import jade.core.behaviours.ThreadedBehaviourFactory;
@@ -16,10 +15,13 @@ public class Vendeur extends Agent {
 	private Float _minAmount;
 	private Float _stepAmount;
 	private Long _timer;
-	private List<String> _namesClients;
+	
+	private List<Offer> _offers;
+	private List<List<String> > _namesClients;
+	private List<OfferBehaviour> _offerBehaviours;
+	
 	private final String _marcketName = "marche";
 	private VendeurInterface _gui;
-	private boolean _announcing;
 	private ThreadedBehaviourFactory _tbf;
 	
 	public Float getAmount() {
@@ -54,33 +56,35 @@ public class Vendeur extends Agent {
 		_timer = t;
 	}
 	
-	public void addClient(String cl) {
-		if(!_namesClients.contains(cl))
-			_namesClients.add(cl);
-		_gui.update();
+	public int getOfferIndex(Offer offer) {
+		return _offers.indexOf(offer);
 	}
-	
-	public String getClient(int i) {
-		if(getNbClients()>0 && i<getNbClients() && i>=0)
-			return _namesClients.get(i);
+
+	public List<String> getClients(Offer offer) {
+		int index = getOfferIndex(offer);
+		if(index >= 0)
+			return _namesClients.get(index);
 		else
 			return null;
 	}
 	
-	public int getNbClients(){
-		return _namesClients.size();
+	public void addClient(String client, Offer offer) {
+		int index = _offers.indexOf(offer);
+		if(index >= 0) {
+			_namesClients.get(index).add(client);
+		}
+	}
+	
+	public OfferBehaviour getOfferBehaviour(Offer offer) {
+		int index = getOfferIndex(offer);
+		if(index >= 0)
+			return _offerBehaviours.get(index);
+		else
+			return null;
 	}
 	
 	public String getMarcket() {
 		return _marcketName;
-	}
-	
-	public void setAnnouncing(boolean a) {
-		_announcing = a;
-	}
-	
-	public boolean getAnnouncing() {
-		return _announcing;
 	}
 	
 	//Constructeur de l'agent
@@ -89,23 +93,21 @@ public class Vendeur extends Agent {
 		
 		_amount = new Float(0);
 		_timer = new Long(0);
-		_announcing = false;
-		_namesClients = new ArrayList<String>();
+		_offers = new ArrayList<Offer>();
+		_namesClients = new ArrayList<List <String> >();
+		_offerBehaviours = new ArrayList<OfferBehaviour>();
+		_tbf = new ThreadedBehaviourFactory();
 		_gui = new VendeurInterface(this);
 
 		//Requête de souscription au marché
 		String[] receiver = new String[] {_marcketName};
 		addBehaviour(new OneMessageBehaviour(this, receiver, Protocol.TO_CREATE, "vendeur"));
 		
-		//Comportement d'écoute de message (behaviour threadé)
-		ReceiveVendeurBehaviour rvb = new ReceiveVendeurBehaviour(this);
-		_tbf = new ThreadedBehaviourFactory();
-		addBehaviour(_tbf.wrap(rvb));
+		addBehaviour(_tbf.wrap(new ReceiveVendeurBehaviour(this)));
 	}
 	
 	//Destructeur
 	protected void takeDown() {
-		_gui.dispose();
         System.out.println("Vendeur-agent "+getAID().getName()+" terminating.");
         super.takeDown();
     }
@@ -115,79 +117,54 @@ public class Vendeur extends Agent {
 		String[] receivers = new String[] {_marcketName};
 		addBehaviour(_tbf.wrap(new OneMessageBehaviour(this, receivers, Protocol.TO_KILL, "vendeur")));
 		_tbf.interrupt();
+		_gui.dispose();
 		doDelete();
 	}
 	
-	//Publication d'une offre et attente d'enchère
+	//Annoncer une offre
 	public void announce() {
-		_gui.update();
-		_announcing = true;
-		String[] receiver = new String[] {_marcketName};
-		addBehaviour( new OneMessageBehaviour(this, receiver, Protocol.TO_ANNOUNCE, _amount.toString()));
-		addBehaviour(new WaitBehaviour(this));
-		addBehaviour(new ProposalVendeurBehaviour(this, true));
-	}
-	
-	//Une enchère reçu aprés timeout, on relance le timeout pour une autre enchère.
-	public void waitOtherBids() {
-		addBehaviour(new WaitBehaviour(this));
-		addBehaviour(new ProposalVendeurBehaviour(this, false));
-	}
-	
-	//Attribuer le gagnant de l'enchère
-	public void attribute() {
-		_announcing = false;
-		_gui.InfoMessage(getClient(0) + " a gagné votre enchère.");
-		String[] receiver = new String[] {_marcketName};
-		addBehaviour(new OneMessageBehaviour(this, receiver, Protocol.TO_ATTRIBUTE, getClient(0)));
-		give();
-	}
-	
-	//Envoi du bien
-	public void give() {
-		String[] receiver = new String[] {_marcketName};
-		addBehaviour(new OneMessageBehaviour(this, receiver, Protocol.TO_GIVE, getClient(0)));
-	}
-	
-	//Réception du paiement - fin del'offre
-	public void payment(String clName) {
-		_gui.InfoMessage("Paiement reçu de " + clName + ".");
-		reset();
+		Offer offer = new Offer();
+		offer.setSellerName(getLocalName());
+		offer.setAmount(_amount);
+		offer.setOfferName(offerNameGenerator());
+		_offers.add(offer);
+		_namesClients.add(new ArrayList<String>());
+		_offerBehaviours.add(new OfferBehaviour(this, offer));
+		
+		addBehaviour(_tbf.wrap(_offerBehaviours.get(getOfferIndex(offer))));
 	}
 
-	//Prix minimum atteint - fin de l'offre
-	public void noBids() {
-		_announcing = false;
-		_gui.InfoMessage("Prix minimum atteint et aucune enchère!");
-		reset();
+	private String offerNameGenerator() {
+		Integer i = 0;
+		String name = null;
+		while(name == null) {
+			name = getLocalName() + "-" + i.toString();
+			Offer offer = new Offer();
+			offer.setOfferName(name);
+			offer.setSellerName(getLocalName());
+			if(_offers.contains(offer)) {
+				name = null;
+				i++;
+			}
+		}
+		return name;
 	}
-	
-	//Remise à zéro aprés la fin d'une offre
-	public void reset() {
+
+	public void endOffer(Offer offer) {
+		int index = _offers.indexOf(offer);
+		
 		String[] receiver = new String[] {_marcketName};
-		addBehaviour( new OneMessageBehaviour(this, receiver, Protocol.TO_ANNOUNCE, new Float(-1).toString()));
-		_amount = new Float(0);
-		_timer = new Long(0);
-		_minAmount = new Float(0);
-		_stepAmount = new Float(0);
-		_namesClients.clear();
-		_gui.reset();
-	}
-
-	//Décliner une enchère
-	public void decline(String buyer) {
-		String[] receiver = new String[] {_marcketName};
-		addBehaviour(new OneMessageBehaviour(this, receiver, Protocol.TO_DECLINE, buyer));
-	}
-
-	//Décliner toute les enchères
-	public void declineAll() {
-		for(int i=0; i<getNbClients(); i++)
-			decline(getClient(i));
-	}
-
-	public void resetClient() {
-		_namesClients.clear();
+		for(int i=1; i<_namesClients.get(index).size(); i++) {
+			String mess = _namesClients.get(index).get(i);
+			addBehaviour(new OneMessageBehaviour(this, receiver, Protocol.TO_DECLINE, mess));
+		}
+		
+		offer.setAmount(new Float(-1.));
+		addBehaviour(new OneMessageBehaviour(this, receiver, Protocol.TO_ANNOUNCE, offer.toACLMessage()));
+		
+		_offers.remove(index);
+		_namesClients.remove(index);
+		_offerBehaviours.remove(index);
 	}
 	
 }

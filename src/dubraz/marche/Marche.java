@@ -3,10 +3,10 @@ package dubraz.marche;
 import java.util.ArrayList;
 import java.util.List;
 
-import utilities.OneMessageBehaviour;
-import utilities.Protocol;
+import utilities.*;
 
 import jade.core.Agent;
+import jade.lang.acl.ACLMessage;
 
 public class Marche extends Agent {
 	
@@ -14,7 +14,7 @@ public class Marche extends Agent {
 	private MarcheInterface _gui;
 	private volatile List<String> _sellersNames;
 	private volatile List<String> _buyersNames;
-	private volatile List<Float> _amounts;
+	private volatile List<Offer> _offers;
 	private static boolean _singleton = false;
 
 	@Override
@@ -23,7 +23,7 @@ public class Marche extends Agent {
 		System.out.println("Hello! Le Marché "+getAID().getLocalName()+" is ready.");
 		_sellersNames = new ArrayList<String>();
 		_buyersNames = new ArrayList<String>();
-		_amounts = new ArrayList<Float>();
+		_offers = new ArrayList<Offer>();
 		_gui = new MarcheInterface(this);
 		
 		//Une seule instance de l'agent Marche peut être créé
@@ -58,17 +58,21 @@ public class Marche extends Agent {
 		doDelete();
 	}
 	
-	public void setAnnounce(String name, Float amount) {
-		if(_sellersNames.contains(name)) {
-			_amounts.set(_sellersNames.indexOf(name), amount);
+	public void setAnnounce(ACLMessage msg) {
+		Offer offer = Offer.fromACLMessage(msg.getContent());
+		
+		if(_offers.contains(offer)){
+			int index = _offers.indexOf(offer);
+			if(offer.getAmount() < 0)
+				_offers.remove(index);
+			else
+				_offers.get(index).setAmount(offer.getAmount());
 		}
-		else {
-			_sellersNames.add(name);
-			_amounts.add(amount);
-		}
+		else
+			_offers.add(offer);
 		_gui.RessourcesUpdated();
 		
-		String mess = name + "~" + amount.toString();
+		String mess = offer.toACLMessage();
 		String[] bn = getStringArray(_buyersNames);
 		if(bn.length > 0)
 			addBehaviour(new OneMessageBehaviour(this, bn, Protocol.TO_ANNOUNCE, mess));
@@ -80,7 +84,6 @@ public class Marche extends Agent {
 	
 	public void createVendeur(String name) {
 		_sellersNames.add(name);
-		_amounts.add(new Float(-1));
 	}
 	
 	public List<String> getSellersNames() {
@@ -91,20 +94,25 @@ public class Marche extends Agent {
 		return _buyersNames;
 	}
 	
-	public List<Float> getAmounts() {
-		return _amounts;
+	public List<Offer> getOffers() {
+		return _offers;
 	}
 
-	public void toBid(String buyer, String[] seller) {
-		addBehaviour(new OneMessageBehaviour(this, seller, Protocol.TO_BID, buyer));
+	public void toBid(ACLMessage msg) {
+		Offer offer = Offer.fromACLMessage(msg.getContent());
+		String mess = offer.toACLMessage() + "~" + msg.getSender().getLocalName();
+		String[] seller = new String[] {offer.getSellerName()};
+		addBehaviour(new OneMessageBehaviour(this, seller, Protocol.TO_BID, mess));
 	}
 
-	public void toDecline(String seller, String[] buyers) {
-		addBehaviour(new OneMessageBehaviour(this, buyers, Protocol.TO_DECLINE, seller));
+	public void toDecline(ACLMessage msg) {
+		String[] buyer = new String[] {msg.getContent()};
+		addBehaviour(new OneMessageBehaviour(this, buyer, Protocol.TO_DECLINE, ""));
 	}
 
-	public void toAttribute(String seller, String[] buyer) {
-		addBehaviour(new OneMessageBehaviour(this, buyer, Protocol.TO_ATTRIBUTE, seller));
+	public void toAttribute(ACLMessage msg) {
+		String[] buyer = new String[] {msg.getContent()};
+		addBehaviour(new OneMessageBehaviour(this, buyer, Protocol.TO_ATTRIBUTE, msg.getSender().getLocalName()));
 	}
 	
 	private String[] getStringArray(List<String> ls) {
@@ -114,12 +122,16 @@ public class Marche extends Agent {
 		return result;
 	}
 
-	public void toGive(String seller, String[] buyer) {
-		addBehaviour(new OneMessageBehaviour(this, buyer, Protocol.TO_GIVE, seller));
+	public void toGive(ACLMessage msg) {
+		String[] buyer = new String[] {msg.getContent()};
+		addBehaviour(new OneMessageBehaviour(this, buyer, Protocol.TO_GIVE, msg.getSender().getLocalName()));
 	}
 
-	public void toPay(String buyer, String[] seller) {
-		addBehaviour(new OneMessageBehaviour(this, seller, Protocol.TO_PAY, buyer));
+	public void toPay(ACLMessage msg) {
+		Offer offer = Offer.fromACLMessage(msg.getContent());
+		String mess = offer.toACLMessage() + "~" + msg.getSender().getLocalName();
+		String[] seller = new String[] {offer.getSellerName()};
+		addBehaviour(new OneMessageBehaviour(this, seller, Protocol.TO_PAY, mess));
 	}
 
 	public void killClient(String buyer) {
@@ -129,7 +141,14 @@ public class Marche extends Agent {
 	public void killVendeur(String seller) {
 		int id = _sellersNames.indexOf(seller);
 		_sellersNames.remove(id);
-		_amounts.remove(id);
+		
+		for(int i=0; i<_offers.size(); i++) {
+			if(_offers.get(i).equals(seller)) {
+				_offers.remove(i);
+				i--;
+			}
+		}
+		
 		_gui.RessourcesUpdated();
 	}
 

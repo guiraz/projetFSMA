@@ -38,8 +38,8 @@ public class MarcheInterface extends JFrame {
 			}
 		});
 		
-		Object[][] d = new Object[0][2];
-		_table = new JTable(new MyTableModel(d, new String[] {"Vendeur","Prix"}));
+		Object[][] d = new Object[0][3];
+		_table = new JTable(new MyTableModel(d, new String[] {"Vendeur", "Offre","Prix"}));
 		_table.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
 		
 		_scrollPaneTable = new JScrollPane();
@@ -71,19 +71,19 @@ public class MarcheInterface extends JFrame {
 	}
 	
 	public void RessourcesUpdated() {
-		List<String> names = _papa.getSellersNames();
-		List<Float> amounts = _papa.getAmounts();
+		List<Offer> offers = _papa.getOffers();
 		
-		Object[][] d = new Object[names.size()][2];
-		for(int i=0; i<names.size(); i++) {
-			d[i][0] = names.get(i);
-			if(amounts.get(i) >= 0)
-				d[i][1] = amounts.get(i);
+		Object[][] d = new Object[offers.size()][3];
+		for(int i=0; i<offers.size(); i++) {
+			d[i][0] = offers.get(i).getSellerName();
+			d[i][1] = offers.get(i).getOfferName();
+			if(offers.get(i).getAmount() >= 0)
+				d[i][2] = offers.get(i).getAmount();
 			else
-				d[i][1] = "n/c";
+				d[i][2] = "n/c";
 		}
 		
-		_table.setModel(new MyTableModel(d, new String[] {"Vendeur","Prix"}));
+		_table.setModel(new MyTableModel(d, new String[] {"Vendeur", "Offre","Prix"}));
 	}
 	
 	public void ErrorMessage(String mess) {

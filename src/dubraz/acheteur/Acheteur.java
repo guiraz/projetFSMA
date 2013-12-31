@@ -3,10 +3,10 @@ package dubraz.acheteur;
 import java.util.ArrayList;
 import java.util.List;
 
-import utilities.OneMessageBehaviour;
-import utilities.Protocol;
+import utilities.*;
 
 import jade.core.Agent;
+import jade.lang.acl.ACLMessage;
 import jade.core.behaviours.ThreadedBehaviourFactory;
 
 public class Acheteur extends Agent {
@@ -15,10 +15,9 @@ public class Acheteur extends Agent {
 	
 	private boolean _automatique, _pay, _give;
 	private Float _defaultAmount;
-	private List<String> _sellersNames;
-	private List<Float> _amounts;
+	private List<Offer> _offers;
 	private final String _marcketName = "marche";
-	private String _sellerBid;
+	private Offer _offerBid;
 	private ThreadedBehaviourFactory _tbf;
 	
 	private AcheteurInterface _gui;
@@ -26,9 +25,8 @@ public class Acheteur extends Agent {
 	public void setup() {
 		System.out.println("Hello! Acheteur-agent "+getAID().getName()+" is ready.");
 		
-		_sellersNames = new ArrayList<String>();
-		_amounts = new ArrayList<Float>();
-		_sellerBid = null;
+		_offers = new ArrayList<Offer>();
+		_offerBid = null;
 		
 		_gui = new AcheteurInterface(this);
 		
@@ -65,21 +63,22 @@ public class Acheteur extends Agent {
 		return _automatique;
 	}
 	
-	public List<String> getSellersNames() {
-		return _sellersNames;
+	public List<Offer> getOffers() {
+		return _offers;
 	}
 	
-	public List<Float> getAmounts() {
-		return _amounts;
-	}
-	
-	public void addOffer(String v, Float a) {
-		if(_sellersNames.contains(v)) {
-			_amounts.set(_sellersNames.indexOf(v), a);
+	public void addOffer(ACLMessage msg) {
+		Offer offer = Offer.fromACLMessage(msg.getContent());
+		
+		if(_offers.contains(offer)) {
+			int index = _offers.indexOf(offer);
+			if(offer.getAmount() < 0)
+				_offers.remove(index);
+			else
+				_offers.get(index).setAmount(offer.getAmount());
 		}
 		else {
-			_sellersNames.add(v);
-			_amounts.add(a);
+			_offers.add(offer);
 		}
 		_gui.ressourcesUpdated();
 		
@@ -87,12 +86,12 @@ public class Acheteur extends Agent {
 			autoBid();
 	}
 	
-	public String getSellerBid() {
-		return _sellerBid;
+	public Offer getOfferBid() {
+		return _offerBid;
 	}
 	
-	public void setSellerBid(String sb) {
-		_sellerBid = new String(sb);
+	public void setOfferBid(Offer offer) {
+		_offerBid = offer;
 	}
 	
 	public Float getDefaultAmount() {
@@ -106,7 +105,7 @@ public class Acheteur extends Agent {
 	}
 
 	public void decline() {
-		_sellerBid = null;
+		_offerBid = null;
 		if(!_automatique)
 			_gui.InfoMessage("Votre offre a été décliné.");
 		_gui.ressourcesUpdated();
@@ -115,14 +114,16 @@ public class Acheteur extends Agent {
 	public void attribute(String seller) {
 		_gui.InfoMessage("Vous avez gagné l'enchère de " + seller + ".");
 		String[] receiver = new String[] {_marcketName};
-		addBehaviour(_tbf.wrap(new OneMessageBehaviour(this, receiver, Protocol.TO_PAY, _sellerBid)));
+		String mess = _offerBid.toACLMessage();
+		addBehaviour(_tbf.wrap(new OneMessageBehaviour(this, receiver, Protocol.TO_PAY, mess)));
 		_pay = true;
 		bidFinished();
 	}
 
 	public void bid() {
 		String[] receiver = new String[] {_marcketName};
-		addBehaviour(new OneMessageBehaviour(this, receiver, Protocol.TO_BID, _sellerBid));
+		String mess = _offerBid.toACLMessage();
+		addBehaviour(new OneMessageBehaviour(this, receiver, Protocol.TO_BID, mess));
 	}
 
 	private void bidFinished() {
@@ -131,13 +132,16 @@ public class Acheteur extends Agent {
 	}
 	
 	private void autoBid(){
-		if(_sellerBid == null) {
+		if(_offerBid == null) {
 			int i=0;
-			while(i<_amounts.size() && _sellerBid==null){
-				if(_amounts.get(i) <= _defaultAmount)
-					_sellerBid = new String(_sellersNames.get(i));
+			while(i<_offers.size() && _offerBid == null){
+				if(_offers.get(i).getAmount() <= _defaultAmount)
+					_offerBid = _offers.get(i);
+				else
+					i++;
 			}
-			bid();
+			if(_offerBid != null)
+				bid();
 		}
 	}
 }

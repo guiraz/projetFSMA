@@ -3,10 +3,11 @@ package dubraz.acheteur;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.List;
 
 import javax.swing.*;
 
-import utilities.MyTableModel;
+import utilities.*;
 
 public class AcheteurInterface extends JFrame {
 
@@ -42,7 +43,7 @@ public class AcheteurInterface extends JFrame {
 			}
 		});
 		
-		_table = new JTable(new Object[0][2], new String[] {"Vendeur","Prix"});
+		_table = new JTable(new Object[0][3], new String[] {"Vendeur", "Offre","Prix"});
 		_table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		_scrollPane = new JScrollPane();
 		_scrollPane.setViewportView(_table);
@@ -88,21 +89,26 @@ public class AcheteurInterface extends JFrame {
 	}
 	
 	public void ressourcesUpdated() {
-		Object[][] data = new Object[_papa.getSellersNames().size()][2];
-		for(int i=0; i<_papa.getSellersNames().size(); i++) {
-			data[i][0] = _papa.getSellersNames().get(i);
-			if(_papa.getAmounts().get(i) >= 0)
-				data[i][1] = _papa.getAmounts().get(i);
+		List<Offer> offers = _papa.getOffers();
+		
+		Object[][] data = new Object[offers.size()][3];
+		for(int i=0; i<offers.size(); i++) {
+			data[i][0] = offers.get(i).getSellerName();
+			data[i][1] = offers.get(i).getOfferName();
+			if(offers.get(i).getAmount() >= 0)
+				data[i][2] = offers.get(i).getAmount();
 			else
-				data[i][1] = new String("n/c");
+				data[i][2] = new String("n/c");
 		}
 		
-		String[] columnsNames = new String[] {"Vendeur", "Prix"};
+		String[] columnsNames = new String[] {"Vendeur", "Offre","Prix"};
 		_table.setModel(new MyTableModel(data, columnsNames));
 		
-		if(_papa.getSellersNames().size() > 0)
-			if(!_papa.isAutomatique() && _papa.getSellerBid()==null)
+		if(offers.size() > 0)
+			if(!_papa.isAutomatique() && _papa.getOfferBid()==null)
 				_buttonBid.setEnabled(true);
+			else
+				_buttonBid.setEnabled(false);
 		else
 			_buttonBid.setEnabled(false);
 	}
@@ -132,11 +138,13 @@ public class AcheteurInterface extends JFrame {
 	}
 	
 	private void ActionBid(ActionEvent ae) {
-		String sBid = (String) _table.getModel().getValueAt(_table.getSelectedRow(), 0);
 		try{
-			Float amount = (Float) _table.getModel().getValueAt(_table.getSelectedRow(), 1);
+			Offer offer = new Offer();
+			offer.setSellerName((String) _table.getModel().getValueAt(_table.getSelectedRow(), 0));
+			offer.setOfferName((String) _table.getModel().getValueAt(_table.getSelectedRow(), 1));
+			offer.setAmount((Float) _table.getModel().getValueAt(_table.getSelectedRow(), 2));
 			_buttonBid.setEnabled(false);
-			_papa.setSellerBid(sBid);
+			_papa.setOfferBid(offer);
 			_papa.bid();
 		}catch(Exception e){
 			ErrorMessage("Pas d'offre pour ce vendeur.");

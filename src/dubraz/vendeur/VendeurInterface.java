@@ -1,6 +1,5 @@
 package dubraz.vendeur;
 
-import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -10,12 +9,8 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
-
-import utilities.MyTableModel;
 
 public class VendeurInterface extends JFrame {
 	
@@ -28,13 +23,10 @@ public class VendeurInterface extends JFrame {
 	private JTextField _minAmountTextField;
 	private JTextField _stepAmountTextField;
 	private JTextField _timerTextField;
-	private JTable _clientTable;
-	private JScrollPane _scrollPaneTable;
 	private JLabel _amountLabel;
 	private JLabel _minAmountLabel;
 	private JLabel _stepAmountLabel;
 	private JLabel _timerLabel;
-	private JLabel _clientLabel;
 
 	public VendeurInterface(Vendeur papa) {
 		_papa = papa;
@@ -64,18 +56,10 @@ public class VendeurInterface extends JFrame {
 		_minAmountTextField = new JTextField();
 		_stepAmountTextField = new JTextField();
 		_timerTextField = new JTextField();
-		_clientTable = new JTable(new MyTableModel(new Object[0][0], new String[] {"Clients"}));
-		_scrollPaneTable = new JScrollPane();
 		_amountLabel = new JLabel("Prix : ");
 		_minAmountLabel = new JLabel("Prix minimum : ");
 		_stepAmountLabel = new JLabel("<html>Pas de l'évolution<br />du prix : </html>");
 		_timerLabel = new JLabel("Timer (en secondes) : ");
-		_clientLabel = new JLabel("Clients : ");
-		
-		_scrollPaneTable.setViewportView(_clientTable);
-		_scrollPaneTable.setMinimumSize(new Dimension(200, 200));
-		
-		_clientTable.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
 		
 		javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -90,14 +74,12 @@ public class VendeurInterface extends JFrame {
 		                .addComponent(_minAmountLabel)
 		                .addComponent(_stepAmountLabel)
 	                    .addComponent(_timerLabel)
-	                    .addComponent(_clientLabel)
 	                    .addComponent(_buttonAnnounce))
                 	.addGroup(layout.createParallelGroup(Alignment.CENTER)
 		                .addComponent(_amountTextField)
 		                .addComponent(_minAmountTextField)
 		                .addComponent(_stepAmountTextField)
 		                .addComponent(_timerTextField)
-		                .addComponent(_scrollPaneTable)
 	                    .addComponent(_buttonQuit))
         );
         layout.setVerticalGroup(
@@ -114,9 +96,6 @@ public class VendeurInterface extends JFrame {
                     .addGroup(layout.createParallelGroup(Alignment.CENTER)
 		                .addComponent(_timerLabel)
 	                    .addComponent(_timerTextField))
-                    .addGroup(layout.createParallelGroup(Alignment.CENTER)
-		                .addComponent(_clientLabel)
-	                    .addComponent(_scrollPaneTable))
 	                .addGroup(layout.createParallelGroup(Alignment.CENTER)
 		                .addComponent(_buttonAnnounce)
 	                    .addComponent(_buttonQuit))
@@ -133,29 +112,6 @@ public class VendeurInterface extends JFrame {
 	
 	public void InfoMessage(String mess) {
 		JOptionPane.showMessageDialog(this, mess, "Information", JOptionPane.INFORMATION_MESSAGE);
-	}
-	
-	public void reset() {
-		_timerTextField.setEditable(true);
-		_amountTextField.setEditable(true);
-		_stepAmountTextField.setEditable(true);
-		_minAmountTextField.setEditable(true);
-		_buttonAnnounce.setEnabled(true);
-		_clientTable.setModel(new MyTableModel(new Object[0][0], new String[] {"Clients"}));
-	}
-	
-	public void update() {
-		_amountTextField.setText(_papa.getAmount().toString());
-		_minAmountTextField.setText(_papa.getMinAmount().toString());
-		_stepAmountTextField.setText(_papa.getStepAmount().toString());
-		_timerTextField.setText(_papa.getTimer().toString());
-		
-		Object[][] data = new Object[_papa.getNbClients()][1];
-		for(int i=0; i<_papa.getNbClients(); i++) {
-			data[i][0] = _papa.getClient(i);
-		}
-		
-		_clientTable.setModel(new MyTableModel(data, new String[] {"Clients"}));
 	}
 	
 	private void launch() {
@@ -212,12 +168,11 @@ public class VendeurInterface extends JFrame {
 				_papa.setMinAmount(minAmount);
 				_papa.setStepAmount(stepAmount);
 				_papa.setTimer(timer);
-				_buttonAnnounce.setEnabled(false);
-				_timerTextField.setEditable(false);
-				_amountTextField.setEditable(false);
-				_minAmountTextField.setEditable(false);
-				_stepAmountTextField.setEditable(false);
 				_papa.announce();
+				_amountTextField.setText("");
+				_timerTextField.setText("");
+				_minAmountTextField.setText("");
+				_stepAmountTextField.setText("");
 			}
 			catch(Exception e) {
 				if(e.getClass() == new NumberFormatException().getClass())
