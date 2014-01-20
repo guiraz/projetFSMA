@@ -12,10 +12,12 @@ import javax.swing.UIManager;
 
 import utilities.MyTableModel;
 
+//gui of an offer of a Seller agent
 public class OfferInterface extends JFrame {
 	
 	private static final long serialVersionUID = 1L;
 	
+	//parent agent
 	private OfferBehaviour _papa;
 	
 	private JLabel _amount, _minAmount, _step, _timer;
@@ -66,14 +68,17 @@ public class OfferInterface extends JFrame {
 		launch();
 	}
 	
+	//display error message 'mess'
 	public void ErrorMessage(String mess) {
 		JOptionPane.showMessageDialog(this, mess, "Error", JOptionPane.ERROR_MESSAGE);
 	}
-	
+
+	//display informative message 'mess'
 	public void InfoMessage(String mess) {
 		JOptionPane.showMessageDialog(this, mess, "Information", JOptionPane.INFORMATION_MESSAGE);
 	}
 	
+	//runnable method
 	private void launch() {
 		java.awt.EventQueue.invokeLater(new Runnable() {
             @Override
@@ -88,6 +93,7 @@ public class OfferInterface extends JFrame {
         });
 	}
 
+	//displaying offer's specifications and bidders
 	public void update() {
 		List<String> clients = _papa.getClients();
 		

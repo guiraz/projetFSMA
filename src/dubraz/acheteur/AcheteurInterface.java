@@ -9,6 +9,7 @@ import javax.swing.*;
 
 import utilities.*;
 
+//buying agent's gui
 public class AcheteurInterface extends JFrame {
 
 	private static final long serialVersionUID = 1L;
@@ -80,17 +81,21 @@ public class AcheteurInterface extends JFrame {
 		launch();
 	}
 	
+	//display error message 'mess'
 	public void ErrorMessage(String mess) {
 		JOptionPane.showMessageDialog(this, mess, "Error", JOptionPane.ERROR_MESSAGE);
 	}
 	
+	//display informative message 'mess'
 	public void InfoMessage(String mess) {
 		JOptionPane.showMessageDialog(this, mess, "Information", JOptionPane.INFORMATION_MESSAGE);
 	}
 	
+	//display all the offers and enable/disable the buttons when necessary
 	public void ressourcesUpdated() {
 		List<Offer> offers = _papa.getOffers();
 		
+		//display offers
 		Object[][] data = new Object[offers.size()][3];
 		for(int i=0; i<offers.size(); i++) {
 			data[i][0] = offers.get(i).getSellerName();
@@ -104,6 +109,7 @@ public class AcheteurInterface extends JFrame {
 		String[] columnsNames = new String[] {"Vendeur", "Offre","Prix"};
 		_table.setModel(new MyTableModel(data, columnsNames));
 		
+		//enable/disable buttons
 		if(offers.size() > 0)
 			if(!_papa.isAutomatique() && _papa.getOfferBid()==null)
 				_buttonBid.setEnabled(true);
@@ -113,6 +119,7 @@ public class AcheteurInterface extends JFrame {
 			_buttonBid.setEnabled(false);
 	}
 	
+	//runnable method
 	private void launch() {
 		java.awt.EventQueue.invokeLater(new Runnable() {
             @Override
@@ -130,6 +137,7 @@ public class AcheteurInterface extends JFrame {
         });
 	}
 	
+	//quit request
 	private void ActionQuitter(ActionEvent ae) {
 		Object[] options = { "OK", "CANCEL" };
         if(JOptionPane.showOptionDialog(null, "Voulez vous quitter?", "Quitter", JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE, null, options, options[0]) == JOptionPane.OK_OPTION) {
@@ -137,6 +145,8 @@ public class AcheteurInterface extends JFrame {
         }
 	}
 	
+	//bid button action
+	//get the infos in the selected row in the table and launch the bid method
 	private void ActionBid(ActionEvent ae) {
 		try{
 			Offer offer = new Offer();
@@ -151,6 +161,7 @@ public class AcheteurInterface extends JFrame {
 		}
 	}
 
+	//ask the user the type of bider (manuel / auto)
 	public boolean getBidProcess() {
 		String[] possibilities = new String[] {"Manuel", "Automatique"};
 		String response = (String) JOptionPane.showInputDialog(null, "Quel type de fonctionnement voulez-vous utiliser pour les enchères?", "Types des enchères", JOptionPane.QUESTION_MESSAGE, null, possibilities, possibilities[0]);
@@ -160,6 +171,7 @@ public class AcheteurInterface extends JFrame {
 			return true;
 	}
 
+	//ask the user the maximum amount for the auto bider
 	public Float getDefaultAmount() {
 		Float result = null;
 		while(result == null) {
@@ -176,6 +188,7 @@ public class AcheteurInterface extends JFrame {
 		return result;
 	}
 
+	//display the default amount for the auto bider
 	public void setLabelAmount() {
 		_labelDefaultAmount.setText("Enchères max : " + _papa.getDefaultAmount());
 	}

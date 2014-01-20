@@ -8,22 +8,32 @@ import utilities.*;
 import jade.core.Agent;
 import jade.core.behaviours.ThreadedBehaviourFactory;
 
+//seller agent
 public class Vendeur extends Agent {
 
 	private static final long serialVersionUID = 1L;
+	
+	//informations of the last offer created
 	private Float _amount;
 	private Float _minAmount;
 	private Float _stepAmount;
 	private Long _timer;
 	
+	//sellers's offers
 	private List<Offer> _offers;
+	//bidders of each offers
 	private List<List<String> > _namesClients;
+	//list of all the offer's behaviours
 	private List<OfferBehaviour> _offerBehaviours;
 	
+	//name of the market
 	private final String _marcketName = "marche";
+	//seller's gui
 	private VendeurInterface _gui;
+	//threaded behaviour factory
 	private ThreadedBehaviourFactory _tbf;
 	
+	//GETTERS/SETTERS//
 	public Float getAmount() {
 		return _amount;
 	}
@@ -87,7 +97,7 @@ public class Vendeur extends Agent {
 		return _marcketName;
 	}
 	
-	//Constructeur de l'agent
+	//Constructor
 	protected void setup() {
 		System.out.println("Hello! Vendeur-agent "+getAID().getName()+" is ready.");
 		
@@ -99,20 +109,20 @@ public class Vendeur extends Agent {
 		_tbf = new ThreadedBehaviourFactory();
 		_gui = new VendeurInterface(this);
 
-		//Requête de souscription au marché
+		//Subscribe to the market
 		String[] receiver = new String[] {_marcketName};
 		addBehaviour(new OneMessageBehaviour(this, receiver, Protocol.TO_CREATE, "vendeur"));
 		
+		//launch the message receival behaviour in a new thread
 		addBehaviour(_tbf.wrap(new ReceiveVendeurBehaviour(this)));
 	}
 	
-	//Destructeur
 	protected void takeDown() {
         System.out.println("Vendeur-agent "+getAID().getName()+" terminating.");
         super.takeDown();
     }
 	
-	//Appel du destructeur
+	//unsubscribe to the market, interrupt TBF and kill the agent
 	public void stop() {
 		String[] receivers = new String[] {_marcketName};
 		addBehaviour(_tbf.wrap(new OneMessageBehaviour(this, receivers, Protocol.TO_KILL, "vendeur")));
@@ -121,7 +131,7 @@ public class Vendeur extends Agent {
 		doDelete();
 	}
 	
-	//Annoncer une offre
+	//announce performative action
 	public void announce() {
 		Offer offer = new Offer();
 		offer.setSellerName(getLocalName());
@@ -134,6 +144,7 @@ public class Vendeur extends Agent {
 		addBehaviour(_tbf.wrap(_offerBehaviours.get(getOfferIndex(offer))));
 	}
 
+	//generate an offer's id
 	private String offerNameGenerator() {
 		Integer i = 0;
 		String name = null;
@@ -150,6 +161,7 @@ public class Vendeur extends Agent {
 		return name;
 	}
 
+	//kill an offer (won or min amount reached)
 	public void endOffer(Offer offer) {
 		int index = _offers.indexOf(offer);
 		

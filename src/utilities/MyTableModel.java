@@ -2,20 +2,26 @@ package utilities;
 
 import javax.swing.table.AbstractTableModel;
 
+//Table model class
 public class MyTableModel extends AbstractTableModel {
     
 	private static final long serialVersionUID = 1L;
 
+	//names of the columns
 	String[] columnNames;
     
+	//all the cells data
     Object[][] data;
     
+    //constructor
     public MyTableModel(Object[][] objs, String[] colNames) {
         super();
         data = objs;
         columnNames = colNames;
     }
 
+    //GETTERS
+    
     @Override
     public int getRowCount() {
         return data.length;

@@ -18,6 +18,7 @@ public class MarcheInterface extends JFrame {
 	
 	private static final long serialVersionUID = 1L;
 	
+	//parent agent
 	private Marche _papa;
 	private JButton _buttonQuit;
 	private JTable _table;
@@ -70,6 +71,7 @@ public class MarcheInterface extends JFrame {
 		launch();
 	}
 	
+	//display all offers
 	public void RessourcesUpdated() {
 		List<Offer> offers = _papa.getOffers();
 		
@@ -86,10 +88,12 @@ public class MarcheInterface extends JFrame {
 		_table.setModel(new MyTableModel(d, new String[] {"Vendeur", "Offre","Prix"}));
 	}
 	
+	//display error message 'mess'
 	public void ErrorMessage(String mess) {
 		JOptionPane.showMessageDialog(this, mess, "Error", JOptionPane.ERROR_MESSAGE);
 	}
-	
+
+	//runnable method
 	private void launch() {
 		java.awt.EventQueue.invokeLater(new Runnable() {
             @Override
@@ -107,6 +111,7 @@ public class MarcheInterface extends JFrame {
         });
 	}
 	
+	//quit request
 	private void ActionQuitter(ActionEvent ae) {
 		Object[] options = { "OK", "CANCEL" };
         if(JOptionPane.showOptionDialog(null, "Voulez vous quitter?", "Quitter", JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE, null, options, options[0]) == JOptionPane.OK_OPTION) {

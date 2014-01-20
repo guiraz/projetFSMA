@@ -12,10 +12,12 @@ import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
 
+//seller agent's gui
 public class VendeurInterface extends JFrame {
 	
 	private static final long serialVersionUID = 1L;
 	
+	//parent agent
 	private Vendeur _papa;
 	private JButton _buttonQuit;
 	private JButton _buttonAnnounce;
@@ -106,14 +108,17 @@ public class VendeurInterface extends JFrame {
 		launch();
 	}
 	
+	//display error message 'mess'
 	public void ErrorMessage(String mess) {
 		JOptionPane.showMessageDialog(this, mess, "Error", JOptionPane.ERROR_MESSAGE);
 	}
 	
+	//display informative message 'mess'	
 	public void InfoMessage(String mess) {
 		JOptionPane.showMessageDialog(this, mess, "Information", JOptionPane.INFORMATION_MESSAGE);
 	}
 	
+	//runnable method
 	private void launch() {
 		java.awt.EventQueue.invokeLater(new Runnable() {
             @Override
@@ -128,6 +133,7 @@ public class VendeurInterface extends JFrame {
         });
 	}
 	
+	//quit request
 	private void ActionQuitter(ActionEvent ae) {
 		Object[] options = { "OK", "CANCEL" };
         if(JOptionPane.showOptionDialog(null, "Voulez vous quitter?", "Quitter", JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE, null, options, options[0]) == JOptionPane.OK_OPTION) {
@@ -135,7 +141,9 @@ public class VendeurInterface extends JFrame {
         }
 	}
 	
+	//announce offer button action
 	private void ActionAnnounce(ActionEvent ae) {
+		//check if on of the field is empty
 		if(_amountTextField.getText().isEmpty() || _timerTextField.getText().isEmpty() || _minAmountTextField.getText().isEmpty() || _stepAmountTextField.getText().isEmpty()) {
 			JOptionPane.showMessageDialog(this, "Tout les champs doivent être renseignés!", " Erreur de saisie ", JOptionPane.ERROR_MESSAGE);
 		}
@@ -143,6 +151,7 @@ public class VendeurInterface extends JFrame {
 		{
 			Float amount, minAmount, stepAmount;
 			Long timer;
+			//check if all the fields are correctly filled
 			try{
 				amount = Float.parseFloat(_amountTextField.getText());
 				if(amount<=0)
@@ -174,6 +183,7 @@ public class VendeurInterface extends JFrame {
 				_minAmountTextField.setText("");
 				_stepAmountTextField.setText("");
 			}
+			//if not, set the field empty and warn the user
 			catch(Exception e) {
 				if(e.getClass() == new NumberFormatException().getClass())
 					JOptionPane.showMessageDialog(this, "Les entrées doivent être des réels positifs ou un entier pour le timer.", " Erreur de saisie ", JOptionPane.ERROR_MESSAGE);

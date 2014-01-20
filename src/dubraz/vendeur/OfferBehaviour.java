@@ -7,18 +7,28 @@ import utilities.OneMessageBehaviour;
 import utilities.Protocol;
 import jade.core.behaviours.Behaviour;
 
+//offer's behaviour
 public class OfferBehaviour extends Behaviour {
 
 	private static final long serialVersionUID = 1L;
 	
+	//defines when behaviour is done
+	//defines if payment and goods are sent/received
 	private boolean _done, _give, _pay;
 	
+	//parent agent
 	private Vendeur _papa;
+	//parent offer
 	private Offer _offer;
+	//current amount
 	private Float _amount;
+	//minimum amount
 	private Float _minAmount;
+	//step of the amount
 	private Float _stepAmount;
+	//step timer
 	private Long _timer;
+	//offer's gui
 	private OfferInterface _gui;
 	
 	public OfferBehaviour(Vendeur papa, Offer offer) {
@@ -36,10 +46,12 @@ public class OfferBehaviour extends Behaviour {
 		_gui = new OfferInterface(this);
 		_gui.update();
 		
+		//announce the offer to the market
 		String[] receiver = new String[] {_papa.getMarcket()};
 		_papa.addBehaviour(new OneMessageBehaviour(_papa, receiver, Protocol.TO_ANNOUNCE, offer.toACLMessage()));
 	}
 	
+	//GETTERS//
 	public Float getAmount() {
 		return _amount;
 	}
@@ -62,10 +74,13 @@ public class OfferBehaviour extends Behaviour {
 
 	@Override
 	public void action() {
+		//while payment and goods are not sent/received
 		if(!_give && !_pay) {
+			//wait timer time
 			waitForBid();
 			List<String> clients = getClients();
 			switch (clients.size()) {
+				//if 0 bidder
 				case 0 :
 					_amount -= _stepAmount;
 					if(_amount >= _minAmount) {
@@ -77,6 +92,7 @@ public class OfferBehaviour extends Behaviour {
 					}
 				break;
 				
+				//if 1 bidder
 				case 1 :
 					waitForBid();
 					clients = getClients();
@@ -89,7 +105,8 @@ public class OfferBehaviour extends Behaviour {
 						bidSuccess();
 					}
 				break;
-					
+				
+				//if several bidders
 				default :
 					_amount += _stepAmount;
 					declineAll(clients);
@@ -99,6 +116,7 @@ public class OfferBehaviour extends Behaviour {
 		}
 	}
 
+	//send a decline message to all bidders
 	private void declineAll(List<String> cls) {
 		String[] receiver = new String[] {_papa.getMarcket()};
 		for(int i=0; i<cls.size(); i++)
@@ -107,6 +125,7 @@ public class OfferBehaviour extends Behaviour {
 		getClients().clear();
 	}
 	
+	//announce the offer
 	private void announce() {
 		_offer.setAmount(_amount);
 		String[] receiver = new String[] {_papa.getMarcket()};
@@ -114,6 +133,7 @@ public class OfferBehaviour extends Behaviour {
 		_gui.update();
 	}
 	
+	//attribute a winner and give goods
 	private void bidSuccess() {
 		List<String> cl = getClients();
 		_gui.InfoMessage("Le gagnant de l'enchère : " + _offer.getOfferName() + " est le client : " + cl.get(0) + ".");
@@ -123,11 +143,14 @@ public class OfferBehaviour extends Behaviour {
 		_give = true;
 	}
 	
+	//receive payment
 	public void payment(String cl) {
 		_gui.InfoMessage("Vous avez reçu le paiement de l'enchère : " + _offer.getOfferName() + " par le client : " + cl + ".");
 		_pay = true;
 	}
 
+	//check if payment and goods are sent/received
+	//if yes, end the offer
 	@Override
 	public boolean done() {
 		if(_done || (_give && _pay)) {
@@ -143,10 +166,12 @@ public class OfferBehaviour extends Behaviour {
 		return _papa.getClients(_offer);
 	}
 
+	//call the update of the gui
 	public void update() {
 		_gui.update();
 	}
 	
+	//wait timer time method
 	public void waitForBid() {
 		try {
 			Thread.sleep(_timer*1000);

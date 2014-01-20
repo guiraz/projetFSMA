@@ -5,10 +5,12 @@ import utilities.Protocol;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
 
+//seller agent's behaviour
 public class ReceiveVendeurBehaviour extends CyclicBehaviour {
 
 	private static final long serialVersionUID = 1L;
     
+	//parent agent
     private Vendeur _papa;
     
     public ReceiveVendeurBehaviour(Vendeur papa) {
@@ -17,9 +19,10 @@ public class ReceiveVendeurBehaviour extends CyclicBehaviour {
 
     @Override
     public void action() {
+    	//receive messages
         ACLMessage msg = _papa.receive();
         if(msg != null) {
-            //Réception d'une enchère
+            //bid performative message
             if(msg.getPerformative() == Protocol.TO_BID.getProtocol()) {
         		Offer offer = Offer.fromACLMessage(msg.getContent());
         		String client = msg.getContent().split("~")[3];
@@ -27,13 +30,14 @@ public class ReceiveVendeurBehaviour extends CyclicBehaviour {
                 _papa.getOfferBehaviour(offer).update();
             }
             
-            //Réception de paiement
+            //pay performative message
             if(msg.getPerformative() == Protocol.TO_PAY.getProtocol()) {
             	Offer offer = Offer.fromACLMessage(msg.getContent());
         		String client = msg.getContent().split("~")[3];
         		_papa.getOfferBehaviour(offer).payment(client);
             }
         }
+        //if no message, block and wait
         else
         {
             block();
